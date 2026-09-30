@@ -1,0 +1,156 @@
+media:
+  input: assets/images
+  output: /h3ll0w0lrd/assets/images
+  extensions:
+  - jpg
+  - jpeg
+  - png
+  - webp
+  - gif
+  rename: random
+content:
+- name: works
+  label: 작품 수집첩
+  type: collection
+  path: _data/works
+  format: json
+  filename: '{fields.id}.json'
+  subfolders: false
+  view:
+    primary: name
+    fields:
+    - name
+    - number
+    - type
+    sort:
+    - number
+    - name
+    default:
+      sort: number
+      order: asc
+  fields:
+  - name: id
+    label: 주소용 이름
+    type: string
+    required: true
+    pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+    description: '예: seo-yunhwa. 작품마다 다르게, 영문 소문자·숫자·하이픈만 사용하세요. 공개 후에는 유지해 주세요.'
+  - name: name
+    label: 작품명
+    type: string
+    required: true
+  - name: number
+    label: 수집첩 순서
+    type: string
+    required: true
+    description: 01, 02, 03처럼 입력하세요.
+  - name: image
+    label: 대표 이미지 / GIF
+    type: image
+  - name: tagline
+    label: 한 줄 소개
+    type: text
+  - name: description
+    label: 작품 소개
+    type: text
+  - name: genres
+    label: 장르
+    type: select
+    options:
+      values:
+      - 현대
+      - 판타지
+      - 로맨스
+      - 미스터리
+      - 공포
+      - SF
+      - 서부극
+      - 스포츠
+      - 청춘
+      multiple: true
+  - name: type
+    label: 1인 / 다인
+    type: select
+    options:
+      values:
+      - 1인
+      - 다인
+      multiple: false
+    required: true
+  - name: romance
+    label: 로맨스 카테고리
+    type: select
+    options:
+      values:
+      - BL
+      - GL
+      - ALL
+      - 로맨스 없음
+      multiple: true
+  - name: keywords
+    label: 취향 키워드
+    type: string
+    list: true
+    description: 소꿉친구, 재회, 집착 등 원하는 키워드를 하나씩 추가하세요.
+  - name: role
+    label: 유저 역할
+    type: text
+  - name: start
+    label: 시작 상황
+    type: text
+  - name: notes
+    label: 플레이 안내
+    type: text
+  - name: gallery
+    label: 추가 이미지
+    type: image
+    list: true
+  - name: platforms
+    label: 플레이 플랫폼 / 버전
+    type: object
+    list: true
+    fields:
+    - name: name
+      label: 플랫폼
+      type: select
+      options:
+        values:
+        - 멜로이
+        - 루모
+        multiple: false
+      required: true
+    - name: label
+      label: 버튼 이름
+      type: string
+      description: '선택 사항. 예: 루모 · 세이프티. 비우면 플랫폼명이 표시됩니다.'
+    - name: url
+      label: 플레이 링크
+      type: string
+      description: 공개 전에는 비워 두세요. https://로 시작하는 링크를 넣으세요.
+    - name: status
+      label: 공개 상태
+      type: select
+      options:
+        values:
+        - 공개 중
+        - 리뉴얼 예정
+        - 공개 중단
+        - 제작 중
+        multiple: false
+      required: true
+    - name: safety
+      label: 세이프티 / 언세이프티
+      type: select
+      options:
+        values:
+        - 세이프티
+        - 언세이프티
+        multiple: true
+      required: true
+    - name: releaseNote
+      label: 버전별 안내
+      type: text
+  - name: coverLines
+    label: 이미지 없을 때 표지 문구
+    type: string
+    list: true

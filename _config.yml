@@ -1,0 +1,7 @@
+title: 민초파왹
+url: https://m1nch0wh4ck.github.io
+baseurl: /h3ll0w0lrd
+encoding: utf-8
+exclude:
+  - README.md
+  - SETUP.md
