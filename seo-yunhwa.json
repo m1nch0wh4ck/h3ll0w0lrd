@@ -1,0 +1,35 @@
+{
+  "image": "/h3ll0w0lrd/assets/images/seo-yunhwa.jpg",
+  "role": "",
+  "start": "",
+  "notes": "",
+  "gallery": [],
+  "genres": [],
+  "romance": [],
+  "keywords": [],
+  "type": "1인",
+  "id": "seo-yunhwa",
+  "name": "서윤화",
+  "number": "01",
+  "description": "드라마 작가이자 대학 강단에 서는 서윤화. 날카로운 말과 흐트러짐 없는 태도 뒤로, 좀처럼 다음 문장으로 넘어가지 못하는 날들이 이어지고 있다.\n\n어느 여름밤, 당신은 아파트 뒤 공터에서 소리 없이 우는 그녀를 마주친다. 못 본 척해 달라던 같은 층 이웃은, 그날 이후 별것 아닌 보답거리를 들고 당신을 찾아오기 시작한다.",
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://neonachat.io/share.html?id=6a87133f7e7c93ffba3fd7ef",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    },
+    {
+      "name": "루모",
+      "url": "",
+      "status": "리뉴얼 예정",
+      "safety": [
+        "언세이프티"
+      ],
+      "releaseNote": "루모 리뉴얼 후 링크 추가 예정"
+    }
+  ],
+  "tagline": "남의 대사는 잘도 쓰면서, 어쩜 제 마음은 한마디를 못 뱉는지."
+}

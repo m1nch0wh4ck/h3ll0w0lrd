@@ -1,0 +1,40 @@
+{
+  "image": "/h3ll0w0lrd/assets/images/jin-hyemin.webp",
+  "role": "",
+  "start": "",
+  "notes": "",
+  "gallery": [],
+  "genres": [
+    "스포츠"
+  ],
+  "romance": [],
+  "keywords": [
+    "소꿉친구",
+    "이웃"
+  ],
+  "type": "1인",
+  "id": "jin-hyemin",
+  "name": "진혜민",
+  "number": "03",
+  "description": "스물셋, 서울 V-스타즈의 세터 진혜민. 코트 위에서는 팀을 이끄는 사령관이지만, 옆집 소꿉친구인 당신 앞에서는 꼭 중요한 말을 삼킨다.\n\n대신 좋아하는 빵을 하나 더 사고, 쉬는 날의 시간을 비워둔다. 오늘은 집으로 들어가려다 말고 다음 홈경기에 와 달라고 한다. 다른 누구도 아닌, 당신에게.",
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://neonachat.io/share.html?id=6a96d7dc30a2e95928345d5a",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    },
+    {
+      "name": "루모",
+      "url": "",
+      "status": "리뉴얼 예정",
+      "safety": [
+        "언세이프티"
+      ],
+      "releaseNote": "루모 리뉴얼 후 링크 추가 예정 · 세이프티판 추가 예정"
+    }
+  ],
+  "tagline": "코트에서는 망설임 없이. 정작 네 앞에서는 한없이 침묵중."
+}

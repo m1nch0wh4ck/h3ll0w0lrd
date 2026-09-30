@@ -1,0 +1,36 @@
+{
+  "image": "/h3ll0w0lrd/assets/images/yururi-yurayura.gif",
+  "role": "",
+  "start": "",
+  "notes": "세이프티 전용 작품입니다.",
+  "gallery": [],
+  "genres": [
+    "청춘"
+  ],
+  "romance": [],
+  "keywords": [
+    "소꿉친구",
+    "재회",
+    "바닷마을"
+  ],
+  "type": "다인",
+  "id": "yururi-yurayura",
+  "name": "유루리 유라유라",
+  "number": "04",
+  "description": "약 10년 만에 돌아온 바닷마을 하야세마치. 고등학교 2학년이 된 당신은 다섯 소꿉친구와 다시 같은 등굣길을 걷는다.\n\n오래된 별명은 입에 익지만, 지금의 서로는 조금 낯설다. 방과 후의 약속과 늦게 도착하는 문자, 남을지 떠날지에 대한 고민 사이로—한때 가까웠던 우리들이 다시 가까워지는 고교 청춘 시뮬레이션.",
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://neonachat.io/share.html?id=6ab4ac2354ea6c01983a8311",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    }
+  ],
+  "coverLines": [
+    "유루리",
+    "유라유라"
+  ],
+  "tagline": "기억하는 너와, 처음 알아가는 너 사이."
+}
