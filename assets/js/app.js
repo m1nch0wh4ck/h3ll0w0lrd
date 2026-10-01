@@ -20,6 +20,8 @@ function matchesWork(w){
  if($('genre').value!=='all'&&!w.genres.includes($('genre').value))return false;
  if($('cast').value!=='all'&&w.type!==$('cast').value)return false;
  if($('romance').value!=='all'&&!w.romance.includes($('romance').value))return false;
+ // Platform details may be left blank while a work is being prepared.
+ if(['platform','status','safety'].every(id=>$(id).value==='all'))return true;
  return w.platforms.some(p=>($('platform').value==='all'||p.name===$('platform').value)&&($('status').value==='all'||p.status===$('status').value)&&($('safety').value==='all'||p.safety.includes($('safety').value)));
 }
 function tags(w){return [...w.genres,w.type,...w.romance,...w.keywords].filter(Boolean).map(t=>`<span class="work-tag">${esc(t)}</span>`).join('');}
