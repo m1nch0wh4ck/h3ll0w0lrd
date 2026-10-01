@@ -1,7 +1,8 @@
 {
   "id": "kang-dowon",
   "name": "강도원",
-  "number": "04",
+  "number": "05",
+  "image": "/h3ll0w0lrd/assets/images/muprcf37-em86fgia.png",
   "genres": [
     "로맨스",
     "현대"
@@ -11,6 +12,7 @@
     "ALL"
   ],
   "keywords": [
-    "느와르"
+    "느와르",
+    "오지콤"
   ]
 }
