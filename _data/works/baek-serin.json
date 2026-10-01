@@ -1,17 +1,11 @@
 {
-  "image": "/h3ll0w0lrd/assets/images/baek-serin.webp",
-  "role": "",
-  "start": "",
-  "notes": "",
-  "gallery": [],
-  "genres": [],
-  "romance": [],
-  "keywords": [],
-  "type": "1인",
-  "id": "baek-serin",
+  "id": "paik-serin",
   "name": "백세린",
   "number": "02",
+  "image": "/h3ll0w0lrd/assets/images/baek-serin.webp",
+  "tagline": "필요한 건 전부 줄게. 넌 계속 내 단짝이면 돼.",
   "description": "스물아홉의 톱배우 백세린은 당신의 15년 지기다. 같은 소속사, 함께 사는 펜트하우스, 그녀가 골라준 옷. 익숙한 호의는 어느새 생활 구석구석에 스며들어 있다.\n\n그런데 당신이 다른 사람을 만나거나 혼자 무언가를 시작하려 하면, 그 다정함이 조금씩 다른 얼굴을 한다. 우리는 오래된 친구인데. 어디까지가 당연한 걸까.",
+  "type": "1인",
   "platforms": [
     {
       "name": "멜로이",
@@ -23,22 +17,21 @@
     },
     {
       "name": "루모",
+      "label": "루모 · 세이프티",
       "url": "https://lumo.gg/character/884182340770294368",
       "status": "공개 중",
       "safety": [
         "세이프티"
-      ],
-      "label": "루모 · 세이프티"
+      ]
     },
     {
       "name": "루모",
+      "label": "루모 · 언세이프티",
       "url": "https://lumo.gg/character/790238860990658805",
       "status": "공개 중",
       "safety": [
         "언세이프티"
-      ],
-      "label": "루모 · 언세이프티"
+      ]
     }
-  ],
-  "tagline": "필요한 건 전부 줄게. 넌 계속 내 단짝이면 돼."
+  ]
 }
