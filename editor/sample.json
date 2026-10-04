@@ -1,0 +1,30 @@
+{
+  "work": "백세린",
+  "creator": "m1nch0wh4ck",
+  "comment": "💎 취향대로 또 대충 말아봤습니다. 까다로운 멘헤라 집착 재벌 여자애라는 짬뽕입니다.\n\n💎 문의사항은 댓글 등으로 부탁드립니다.",
+  "bgm": "MARINA — Lonely Hearts Club",
+  "color": "#F0A3BC",
+  "emoji1": "💎",
+  "emoji2": "🌹",
+  "tone": "light",
+  "seed": 1,
+  "patches": [
+    {
+      "date": "2026-09-28",
+      "title": "프롬프트 리뉴얼",
+      "added": "각종 명령어 추가",
+      "changed": "프롬프트 리뉴얼 패치",
+      "note": ""
+    },
+    {
+      "date": "2026-09-18",
+      "title": "유저 관련 지침 업데이트",
+      "changed": "유저 성별 및 젠더 관련 지침 업데이트"
+    },
+    {
+      "date": "2026-09-06",
+      "title": "세이프티 버전 추가",
+      "added": "세이프티 버전 추가"
+    }
+  ]
+}
