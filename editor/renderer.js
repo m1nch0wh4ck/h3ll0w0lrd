@@ -7,7 +7,7 @@ export const newKey=()=>crypto.randomUUID().replaceAll('-','');
 export function normalize(v){
  if(!v||typeof v!=='object'||!Array.isArray(v.patches))throw Error('코멘트 편집기에서 저장한 JSON 파일을 선택해 주세요.');
  const str=x=>typeof x==='string'?x:'';
- return {version:2,key:/^[a-f0-9]{32}$/.test(v.key)?v.key:newKey(),work:str(v.work),creator:str(v.creator),comment:str(v.comment),bgm:str(v.bgm),color:/^#[0-9a-f]{6}$/i.test(v.color)?v.color:'#00EFB2',emoji1:typeof v.emoji1==='string'?v.emoji1:'💎',emoji2:typeof v.emoji2==='string'?v.emoji2:'🌹',tone:v.tone==='dark'?'dark':'light',seed:Number.isInteger(v.seed)?v.seed:1,patches:v.patches.filter(p=>p&&typeof p==='object').map(p=>Object.fromEntries(['date','title','added','changed','note'].map(k=>[k,str(p[k])])))};
+ return {version:3,project:str(v.project).trim(),safety:['safe','unsafe'].includes(v.safety)?v.safety:'unspecified',key:/^[a-f0-9]{32}$/.test(v.key)?v.key:newKey(),work:str(v.work),creator:str(v.creator),comment:str(v.comment),bgm:str(v.bgm),color:/^#[0-9a-f]{6}$/i.test(v.color)?v.color:'#00EFB2',emoji1:typeof v.emoji1==='string'?v.emoji1:'💎',emoji2:typeof v.emoji2==='string'?v.emoji2:'🌹',tone:v.tone==='dark'?'dark':'light',seed:Number.isInteger(v.seed)?v.seed:1,patches:v.patches.filter(p=>p&&typeof p==='object').map(p=>Object.fromEntries(['date','title','added','changed','note'].map(k=>[k,str(p[k])])))};
 }
 export function generate(input){
  const d=normalize(input),fg=d.tone==='dark'?'#ffffff':'#141615';
@@ -18,3 +18,9 @@ export function generate(input){
  return baseGenerate(d).replace('<div class="mcc-log"',css+'<div class="mcc-log"').replace('<div class="mcc-heading">','<div class="mcc-heading"><div class="mcc-wallpaper" aria-hidden="true">'+wallpaper+'</div>');
 }
 export {esc};
+
+export const safetyLabel=v=>v==='safe'?'세이프티':v==='unsafe'?'언세이프티':'미지정';
+export function matches(d,project='all',safety='all',query=''){
+ return (project==='all'||(project==='unfiled'?!d.project:project==='p:'+d.project))&&(safety==='all'||d.safety===safety)&&(!query||d.work.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+}
+export function projectOptions(records){return [...new Set(records.map(r=>r.project).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));}
