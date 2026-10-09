@@ -1,6 +1,6 @@
-import {defaultProfile,normalizeProfile,generateProfile,mergeCms,value,imageURL,manualId,esc,FIELDS,LIMIT} from './profile.js';
+import {defaultProfile,normalizeProfile,generateProfile,mergeCms,value,imageURL,manualId,esc,FIELDS,LIMIT,SAFETY} from './profile.js';
 const $=id=>document.getElementById(id),STORE='lumo-studio-profile-v1',BACKUP=STORE+'-previous';
-const LABELS={name:'작품명',number:'수집첩 번호',image:'이미지 주소 (https://)',tagline:'한 줄 소개',tags:'표시할 태그 (쉼표로 구분)',note:'상태 문구'};
+const LABELS={name:'작품명',number:'수집첩 번호',image:'이미지 주소 (https://)',safety:'세이프티 라벨',tagline:'한 줄 소개',tags:'표시할 태그 (쉼표로 구분)',note:'상태 문구'};
 let p,output='',timer,dirty=false,loadFailed=false,ctx;
 export const getProfile=()=>p;
 
@@ -16,6 +16,7 @@ function fetchedText(){return p.cmsFetchedAt?'마지막 불러오기: '+new Date
 function workHTML(w,i){
  const cms=w.source==='cms',img=value(w,'image'),badImg=img.trim()&&!imageURL(img);
  const fields=FIELDS.map(k=>{const own=cms&&Object.prototype.hasOwnProperty.call(w.override,k),id=`w-${i}-${k}`,v=esc(value(w,k));
+  if(k==='safety'){const on=value(w,k).split(',').map(s=>s.trim());return `<fieldset class="safety"><legend>${LABELS[k]}${own?' <span class="badge">수정함</span>':''}</legend>${SAFETY.map((s,n)=>`<label class="check"><input type="checkbox" data-safety="${i}" value="${s}"${on.includes(s)?' checked':''}> ${s}</label>`).join('')}${own?`<button data-reset="${i}" data-key="safety" aria-label="세이프티 라벨 홈페이지 값으로 되돌리기">↺ 홈페이지 값</button>`:''}${cms?'<p class="small">홈페이지의 루모 플랫폼 값을 기본으로 씁니다. 둘 다 끄면 라벨이 나오지 않습니다.</p>':''}</fieldset>`;}
   return `<label for="${id}">${LABELS[k]}${own?' <span class="badge">수정함</span>':''}</label><div class="field-row">${k==='tagline'?`<textarea id="${id}" rows="2" data-work="${i}" data-key="${k}">${v}</textarea>`:`<input id="${id}" data-work="${i}" data-key="${k}" value="${v}"${k==='image'?' inputmode="url" autocapitalize="none" spellcheck="false"':''}>`}${own?`<button data-reset="${i}" data-key="${k}" title="홈페이지 값으로 되돌리기" aria-label="${LABELS[k]} 홈페이지 값으로 되돌리기">↺</button>`:''}</div>${k==='image'?`<p class="small${badImg?' danger':''}" id="w-${i}-image-hint">${badImg?'https:// 로 시작하는 이미지 주소가 아니어서 이름 표지로 대신 표시합니다.':'GIF도 그대로 표시됩니다. 이미지 파일은 저장하지 않고 주소만 사용합니다.'}</p>`:''}${k==='tags'&&w.base.keywords.length?`<button class="small-btn" data-keywords="${i}">홈페이지 키워드 넣기: ${esc(w.base.keywords.join(', '))}</button>`:''}`;}).join('');
  return `<details class="box work${w.show?' on':''}"${w.open?' open':''} data-index="${i}"><summary><span class="work-order">${i+1}</span> ${esc(value(w,'name')||'이름 없는 작품')} ${w.show?'<span class="badge safe">표시</span>':'<span class="badge">숨김</span>'} ${cms?'':'<span class="badge">직접 추가</span>'}${w.missing?' <span class="badge unsafe">홈페이지에서 사라짐</span>':''}</summary>
  <label class="check"><input type="checkbox" data-show="${i}"${w.show?' checked':''}> 루모 소개에 표시</label>
@@ -45,6 +46,7 @@ export function initProfile(c){
  $('p-works-list').addEventListener('toggle',e=>{const d=e.target;if(d.matches?.('details.work'))p.works[+d.dataset.index].open=d.open;},true);
  $('p-works-list').oninput=e=>{const t=e.target,i=+t.dataset.work,w=p.works[i];
   if(t.dataset.show!==undefined){p.works[+t.dataset.show].show=t.checked;changed();renderWorks();return;}
+  if(t.dataset.safety!==undefined){const j=+t.dataset.safety,v=[...t.closest('fieldset').querySelectorAll('input:checked')].map(x=>x.value).join(',');if(p.works[j].source==='cms')p.works[j].override.safety=v;else p.works[j].base.safety=v;changed();renderWorks();return;}
   if(!w||!t.dataset.key)return;const k=t.dataset.key;
   if(w.source==='cms'){const first=!Object.prototype.hasOwnProperty.call(w.override,k);w.override[k]=t.value;
    // 수정 배지·되돌리기 버튼은 목록을 다시 그리지 않고 붙여 입력 중 포커스가 유지되게 함
@@ -58,7 +60,7 @@ export function initProfile(c){
   else if(b.dataset.keywords){const w=p.works[+b.dataset.keywords];w.override.tags=w.base.keywords.join(', ');}
   else if(b.dataset.removeWork){const w=p.works[+b.dataset.removeWork];if(!confirm(`‘${value(w,'name')||'이름 없는 작품'}’을 루모 소개 목록에서 삭제할까요? 홈페이지에는 영향이 없습니다.`))return;p.works.splice(+b.dataset.removeWork,1);}
   else return;renderWorks();changed();};
- $('p-add-work').onclick=()=>{p.works.push({id:manualId(),source:'manual',show:true,missing:false,open:true,base:{name:'새 작품',number:'',image:'',tagline:'',tags:'',note:'',keywords:[],platforms:''},override:{}});renderWorks();changed();$(`w-${p.works.length-1}-name`).focus();};
+ $('p-add-work').onclick=()=>{p.works.push({id:manualId(),source:'manual',show:true,missing:false,open:true,base:{name:'새 작품',number:'',image:'',safety:'',tagline:'',tags:'',note:'',keywords:[],platforms:''},override:{}});renderWorks();changed();$(`w-${p.works.length-1}-name`).focus();};
  $('p-refresh').onclick=refreshCms;
  $('p-copy').onclick=async()=>{renderProfilePreview();if(output.length>LIMIT)return;try{await navigator.clipboard.writeText(output);ctx.say('HTML을 복사했습니다. 루모 제작자 소개에 붙여넣어 주세요.');}catch{$('p-code-details').open=true;selectCode();ctx.say('자동 복사가 막혔습니다. 선택된 코드를 직접 복사해 주세요.');}};
  const selectCode=()=>{$('p-code').focus();$('p-code').select();$('p-code').setSelectionRange(0,output.length);};
