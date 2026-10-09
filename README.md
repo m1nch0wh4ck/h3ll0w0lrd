@@ -26,6 +26,7 @@ COMING NEXT · LOG · INFO 글 관리는 [CMS-GUIDE.md](CMS-GUIDE.md)를 보세�
 | data/site.json | Jekyll이 COMING NEXT·LOG·INFO를 합쳐 내보내는 파일 |
 | .pages.yml | 작품·COMING NEXT·LOG·INFO 관리 양식 |
 | _config.yml | GitHub Pages 설정 |
+| editor/ | 루모 스튜디오(제작자 코멘트·제작자 소개페이지 HTML 편집기, 설치형 웹앱). 홈페이지 data/works.json을 읽기만 함 |
 
 CMS에서 작품을 저장하면 JSON이 갱신되고, GitHub Pages 재배포 후 홈페이지에 반영됩니다.
 별도 npm 설치나 LLM API는 필요하지 않습니다. 페르소나 뽑기는 아직 구현하지 않았습니다.
