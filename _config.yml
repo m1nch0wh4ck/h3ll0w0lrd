@@ -5,3 +5,4 @@ encoding: utf-8
 exclude:
   - README.md
   - SETUP.md
+  - CMS-GUIDE.md

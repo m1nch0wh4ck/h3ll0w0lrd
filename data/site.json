@@ -1,0 +1,4 @@
+---
+layout: null
+---
+{"upcoming":{{ site.data.upcoming | jsonify }},"logs":{{ site.data.logs | jsonify }},"info":{{ site.data.info | jsonify }}}

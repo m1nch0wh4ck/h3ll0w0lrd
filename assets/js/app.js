@@ -1,3 +1,72 @@
+// COMING NEXT / LOG / INFO are edited in Pages CMS (_data/upcoming, _data/logs, _data/info.json) and exported by data/site.json.
+// Loaded separately so a problem here never hides the work collection.
+(async function(){
+ const $=id=>document.getElementById(id);
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const str=v=>typeof v==='string'?v.trim():'';
+ const items=v=>(Array.isArray(v)?v:Object.values(v&&typeof v==='object'?v:{})).filter(x=>x&&typeof x==='object'&&str(x.title)&&x.visible!==false);
+ // Internal screens or https:// only. Anything else (javascript:, data:, ...) becomes plain text.
+ const safeLink=v=>{v=str(v);if(/^#(home|collection|notes|about|contact|work\/[a-z0-9-]+)$/.test(v))return v;try{return new URL(v).protocol==='https:'?v:'';}catch{return '';}};
+ const linkAttrs=href=>href.startsWith('#')?`href="${esc(href)}"`:`href="${esc(href)}" target="_blank" rel="noopener noreferrer"`;
+ const lines=t=>esc(t).replace(/\n/g,'<br>');
+ const paragraphs=t=>str(t).replace(/\r\n?/g,'\n').split(/\n[ \t]*\n+/).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${lines(s)}</p>`).join('');
+ const DATE=/^(\d{4})-(\d{2})-(\d{2})$/;
+ const byId=(a,b)=>str(a.id).localeCompare(str(b.id));
+ function renderUpcoming(data){
+  const num=v=>v===''||v==null||!isFinite(v)?Infinity:Number(v);
+  const list=items(data).sort((a,b)=>num(a.order)-num(b.order)||str(a.title).localeCompare(str(b.title),'ko')||byId(a,b));
+  const box=$('home-news');
+  box.innerHTML=list.length?'<h2>COMING NEXT</h2>'+list.map(x=>{const href=safeLink(x.link);const title=href?`<a ${linkAttrs(href)}>${esc(str(x.title))}</a>`:`<span class="news-title">${esc(str(x.title))}</span>`;return `<div class="news-item">${str(x.status)?`<span class="news-status">${esc(str(x.status))}</span>`:''}${title}${str(x.summary)?`<small>${lines(str(x.summary))}</small>`:''}</div>`;}).join(''):'';
+  box.hidden=!list.length;
+ }
+ function renderLogs(data){
+  // Newest date first; records without a date keep a fixed order after dated ones.
+  const list=items(data).map(x=>({...x,date:DATE.test(str(x.date))?str(x.date):''})).sort((a,b)=>(a.date&&b.date?b.date.localeCompare(a.date):!a.date-!b.date)||byId(a,b));
+  $('log-list').innerHTML=list.map(x=>{const tag=str(x.tag)||str(x.category);const d=x.date.match(DATE);return `<article class="note">${tag?`<span class="note-tag">${esc(tag)}</span>`:''}${d?`<time class="note-date" datetime="${x.date}">${d[1]}.${d[2]}.${d[3]}</time>`:''}<h3>${esc(str(x.title))}</h3>${paragraphs(x.body)}</article>`;}).join('');
+  $('log-empty').hidden=list.length!==0;
+ }
+ // The CMS rich-text field stores HTML. Rebuild it from scratch keeping only basic text formatting.
+ function cleanRichText(html){
+  const KEEP=new Set(['P','BR','STRONG','B','EM','I','U','S','A','UL','OL','LI']);
+  const DROP=new Set(['SCRIPT','STYLE','TEMPLATE','IFRAME','OBJECT','EMBED','NOSCRIPT','SVG','MATH','IMG','VIDEO','AUDIO','SOURCE','FORM','INPUT','TEXTAREA','SELECT','BUTTON','LINK','META','TITLE']);
+  const copy=(from,to)=>{for(const n of from.childNodes){
+   if(n.nodeType===3){to.appendChild(document.createTextNode(n.nodeValue));continue;}
+   if(n.nodeType!==1||DROP.has(n.tagName))continue;
+   if(!KEEP.has(n.tagName)){copy(n,to);continue;}
+   const el=document.createElement(n.tagName);
+   if(n.tagName==='A'){const href=safeLink(n.getAttribute('href'));if(!href){copy(n,to);continue;}el.setAttribute('href',href);if(!href.startsWith('#')){el.target='_blank';el.rel='noopener noreferrer';}}
+   copy(n,el);to.appendChild(el);
+  }};
+  const parsed=new DOMParser().parseFromString(String(html||''),'text/html');
+  const out=document.createDocumentFragment();let loose=null;
+  for(const n of parsed.body.childNodes){
+   // Loose text or inline marks outside a paragraph get their own <p> so they keep the read_me styling.
+   if(n.nodeType===1&&['P','UL','OL'].includes(n.tagName)){loose=null;copy({childNodes:[n]},out);continue;}
+   if(n.nodeType===1&&['DIV','H1','H2','H3','H4','H5','H6','BLOCKQUOTE'].includes(n.tagName)){loose=null;const p=document.createElement('p');copy(n,p);out.appendChild(p);continue;}
+   if(!loose){loose=document.createElement('p');out.appendChild(loose);}
+   copy({childNodes:[n]},loose);
+  }
+  [...out.childNodes].forEach(el=>{if(!el.textContent.trim())el.remove();});
+  return out;
+ }
+ function renderInfo(info){
+  info=info&&typeof info==='object'?info:{};
+  $('about-title').textContent=str(info.heading)||'Info';
+  const intro=str(info.intro).replace(/\r\n?/g,'\n');$('info-intro').innerHTML=lines(intro);$('info-intro').hidden=!intro;
+  const note=str(info.introNote);$('info-note').textContent=note;$('info-note').hidden=!note;
+  $('info-readme').replaceChildren(cleanRichText(info.readme));
+ }
+ try{
+  const response=await fetch('data/site.json');
+  if(!response.ok)throw new Error('홈페이지 정보를 불러오지 못했습니다.');
+  const data=await response.json()||{};
+  for(const [name,fn] of [['upcoming',renderUpcoming],['logs',renderLogs],['info',renderInfo]]){try{fn(data[name]);}catch(error){console.error(name,error);}}
+ }catch(error){
+  console.error(error);
+  $('log-empty').textContent='기록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';$('log-empty').hidden=false;
+  const p=document.createElement('p');p.textContent='정보를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';$('info-readme').replaceChildren(p);
+ }
+})();
 (async function(){
 try {
  const response=await fetch('data/works.json');

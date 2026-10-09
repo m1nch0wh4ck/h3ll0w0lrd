@@ -154,3 +154,150 @@ content:
     label: 이미지 없을 때 표지 문구
     type: string
     list: true
+- name: upcoming
+  label: COMING NEXT · 제작 예정
+  description: 홈 화면 아래 COMING NEXT 줄에 나오는 항목입니다. 저장하면 GitHub에 기록되고, GitHub Pages 배포가 끝난 뒤(보통 1~3분) 홈페이지에 반영됩니다.
+  type: collection
+  path: _data/upcoming
+  format: json
+  filename: '{fields.id}.json'
+  subfolders: false
+  view:
+    primary: title
+    fields:
+    - title
+    - status
+    - order
+    - visible
+    sort:
+    - order
+    - title
+    default:
+      sort: order
+      order: asc
+  fields:
+  - name: id
+    label: 자동 고유번호
+    type: uuid
+    hidden: true
+    options:
+      generate: false
+  - name: title
+    label: 제목
+    type: string
+    required: true
+    description: '예: 시게르트 · 소렌 리뉴얼'
+  - name: summary
+    label: 짧은 안내
+    type: text
+    description: 선택 사항. 비워 두면 제목만 표시됩니다.
+  - name: status
+    label: 진행 상태
+    type: select
+    options:
+      values:
+      - 제작 예정
+      - 제작 중
+      - 리뉴얼 예정
+      - 잠시 보류
+      multiple: false
+  - name: order
+    label: 노출 순서
+    type: number
+    description: 작은 숫자가 먼저 나옵니다. 1, 2, 3처럼 입력하세요. 같은 숫자면 제목 순으로 나옵니다.
+  - name: visible
+    label: 홈페이지에 표시
+    type: boolean
+    default: true
+    description: 끄면 홈페이지 화면에서만 빠집니다. 공개 저장소의 내용까지 비공개가 되지는 않으니 비밀 내용은 적지 마세요.
+  - name: link
+    label: 연결 주소
+    type: string
+    description: '선택 사항. 홈페이지 안 메뉴는 #notes(LOG), #collection, #about, 작품은 #work/작품주소용이름. 바깥 링크는 https://로 시작해야 합니다. 비우면 링크 없이 글자만 나옵니다.'
+- name: logs
+  label: LOG · 제작 기록
+  description: LOG(제작 노트) 화면의 기록 카드입니다. 날짜가 최근인 기록부터 나오고, 날짜 없는 예전 기록은 맨 뒤에 나옵니다. 저장 후 GitHub Pages 배포가 끝나면 반영됩니다.
+  type: collection
+  path: _data/logs
+  format: json
+  filename: '{fields.id}.json'
+  subfolders: false
+  view:
+    primary: title
+    fields:
+    - title
+    - date
+    - category
+    - visible
+    sort:
+    - date
+    - title
+    default:
+      sort: date
+      order: desc
+  fields:
+  - name: id
+    label: 자동 고유번호
+    type: uuid
+    hidden: true
+    options:
+      generate: false
+  - name: date
+    label: 날짜
+    type: date
+    default: ''
+    description: 새 기록은 날짜를 선택해 주세요. 날짜 없는 예전 기록은 비워 두어도 됩니다.
+  - name: title
+    label: 제목
+    type: string
+    required: true
+  - name: category
+    label: 분류
+    type: select
+    options:
+      values:
+      - 제작 소식
+      - 업데이트
+      - 공지
+      - 기타
+      multiple: false
+  - name: tag
+    label: 카드 꼬리표
+    type: string
+    description: '선택 사항. 카드 위 민트색 꼬리표에 분류 대신 보일 말입니다. 예: 리뉴얼 예정'
+  - name: body
+    label: 본문
+    type: text
+    description: 평소처럼 쓰세요. 줄을 바꾸면 줄바꿈, 한 줄을 비우면 문단이 나뉩니다.
+  - name: visible
+    label: 홈페이지에 표시
+    type: boolean
+    default: true
+    description: 끄면 홈페이지 화면에서만 빠집니다. 공개 저장소의 내용까지 비공개가 되지는 않으니 비밀 내용은 적지 마세요.
+- name: info
+  label: INFO · 제작자 정보
+  description: INFO 화면의 소개 상자(왼쪽)와 read_me.txt(오른쪽)입니다. 저장 후 GitHub Pages 배포가 끝나면 반영됩니다.
+  type: file
+  path: _data/info.json
+  format: json
+  fields:
+  - name: heading
+    label: 소개 상자 제목
+    type: string
+    description: '예: 👽 Info!'
+  - name: intro
+    label: 소개 문구 (크게 표시)
+    type: text
+    description: 왼쪽 민트 상자의 굵은 문구입니다. 줄을 바꾸면 홈페이지에서도 그 자리에서 줄이 바뀝니다.
+  - name: introNote
+    label: 짧은 덧말
+    type: string
+    description: '소개 문구 아래 작은 글씨입니다. 예: 초보라 미숙합니다.'
+  - name: readme
+    label: read_me.txt 안내 문단
+    type: rich-text
+    options:
+      format: html
+      switcher: false
+      media: false
+    description: 오른쪽 안내 상자입니다. 엔터로 문단을 나누고, 강조할 부분은 글자를 선택한 뒤 굵게(B) 버튼을 누르세요.

@@ -3,6 +3,7 @@
 민트초코와 외계인을 테마로 한 제작자 홈페이지입니다.
 
 설치는 [SETUP.md](SETUP.md)를 순서대로 따라 하세요.
+COMING NEXT · LOG · INFO 글 관리는 [CMS-GUIDE.md](CMS-GUIDE.md)를 보세요.
 
 - 홈페이지: https://m1nch0wh4ck.github.io/h3ll0w0lrd/
 - 작품 관리: https://app.pagescms.org/
@@ -18,8 +19,12 @@
 | assets/js/app.js | 화면 이동·검색·작품 상세 |
 | assets/images | 메인 이미지·작품 이미지·GIF |
 | _data/works | 작품별 JSON 데이터 |
+| _data/upcoming | COMING NEXT 항목별 JSON |
+| _data/logs | LOG 기록별 JSON |
+| _data/info.json | INFO 소개 문구 |
 | data/works.json | Jekyll이 작품 목록을 합쳐 내보내는 파일 |
-| .pages.yml | 작품 등록 양식 |
+| data/site.json | Jekyll이 COMING NEXT·LOG·INFO를 합쳐 내보내는 파일 |
+| .pages.yml | 작품·COMING NEXT·LOG·INFO 관리 양식 |
 | _config.yml | GitHub Pages 설정 |
 
 CMS에서 작품을 저장하면 JSON이 갱신되고, GitHub Pages 재배포 후 홈페이지에 반영됩니다.
