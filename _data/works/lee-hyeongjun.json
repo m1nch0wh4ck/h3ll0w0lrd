@@ -13,6 +13,20 @@
     "ALL"
   ],
   "keywords": [
-    "오지콤"
+    "오지콤",
+    "아저씨",
+    "중년",
+    "연상",
+    "이혼"
+  ],
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://melloy.io/share?id=6abaa77e54ea6c01983b7add&lang=ko",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    }
   ]
 }
