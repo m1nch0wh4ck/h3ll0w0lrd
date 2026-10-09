@@ -57,7 +57,7 @@
   $('info-readme').replaceChildren(cleanRichText(info.readme));
  }
  try{
-  const response=await fetch('data/site.json');
+  const response=await fetch('data/site.json',{cache:'no-cache'});
   if(!response.ok)throw new Error('홈페이지 정보를 불러오지 못했습니다.');
   const data=await response.json()||{};
   for(const [name,fn] of [['upcoming',renderUpcoming],['logs',renderLogs],['info',renderInfo]]){try{fn(data[name]);}catch(error){console.error(name,error);}}
@@ -69,7 +69,7 @@
 })();
 (async function(){
 try {
- const response=await fetch('data/works.json');
+ const response=await fetch('data/works.json',{cache:'no-cache'});
  if(!response.ok)throw new Error('작품 목록을 불러오지 못했습니다.');
  const records=await response.json();
  const list=v=>Array.isArray(v)?v:[];
