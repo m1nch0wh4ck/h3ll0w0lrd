@@ -3,7 +3,7 @@
   "name": "강도원",
   "number": "05",
   "image": "/h3ll0w0lrd/assets/images/muprcf37-em86fgia.png",
-  "tagline": "값은 매겨 드립니다. 그게 제 일이니까. \n<br>…이건 안 되겠습니다.",
+  "tagline": "값은 매겨 드립니다. 그게 제 일이니까. \n…이건 안 되겠습니다.",
   "genres": [
     "로맨스",
     "현대"
@@ -15,5 +15,31 @@
   "keywords": [
     "느와르",
     "오지콤"
+  ],
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://melloy.io/share?id=6ab9343254ea6c01983b45d3&lang=ko",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    },
+    {
+      "name": "루모",
+      "url": "https://lumo.gg/character/894317841588603122",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    },
+    {
+      "name": "루모",
+      "url": "https://lumo.gg/character/894318084136813027",
+      "status": "공개 중",
+      "safety": [
+        "언세이프티"
+      ]
+    }
   ]
 }
