@@ -119,10 +119,6 @@ content:
         - 루모
         multiple: false
       required: true
-    - name: label
-      label: 버튼 이름
-      type: string
-      description: '보통은 비워 두세요. 비우면 플랫폼과 세이프티 선택값으로 "루모 · 세이프티에서 플레이"처럼 자동 표시됩니다. 다른 말로 바꾸고 싶을 때만 입력하세요. 수집첩 카드에는 항상 선택값이 표시됩니다.'
     - name: url
       label: 플레이 링크
       type: string
