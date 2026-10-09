@@ -1,5 +1,7 @@
-const CACHE='mint-comment-editor-v2.1.0';
+const CACHE='mint-comment-editor-v2.1.1';
 const ASSETS=['./','./index.html','./app.css','./app.js','./renderer.js','./profile.js','./profile-ui.js','./sample.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(a=>new Request(a,{cache:'reload'}))))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('mint-comment-editor-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin||!url.href.startsWith(self.registration.scope))return;event.respondWith(caches.open(CACHE).then(async cache=>{const cached=await cache.match(event.request,{ignoreSearch:true});if(cached)return cached;try{return await fetch(event.request);}catch(e){if(event.request.mode==='navigate')return cache.match('./index.html');throw e;}}));});
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin||!url.href.startsWith(self.registration.scope))return;// 앱 이름·아이콘 정보는 설치된 앱과 어긋나지 않도록 인터넷이 되면 항상 새로 받음
+ if(url.pathname.endsWith('/manifest.webmanifest')){event.respondWith(caches.open(CACHE).then(cache=>fetch(event.request,{cache:'no-cache'}).then(res=>{if(res.ok)cache.put(event.request,res.clone());return res;}).catch(()=>cache.match(event.request,{ignoreSearch:true}))));return;}
+ event.respondWith(caches.open(CACHE).then(async cache=>{const cached=await cache.match(event.request,{ignoreSearch:true});if(cached)return cached;try{return await fetch(event.request);}catch(e){if(event.request.mode==='navigate')return cache.match('./index.html');throw e;}}));});
