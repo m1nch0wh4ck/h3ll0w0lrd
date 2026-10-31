@@ -15,6 +15,18 @@
     "ALL"
   ],
   "keywords": [
-    "재회"
+    "재회",
+    "정병청춘"
+  ],
+  "notes": "멜로이 오리지널 공모전 우수상 당선작 / 세이프티 전용 작품입니다.",
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://melloy.io/share?id=6ab3d1e7d13e6970b666533c&lang=ko",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    }
   ]
 }
