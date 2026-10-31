@@ -17,13 +17,27 @@
     "멘헤라",
     "집착"
   ],
+  "gallery": [
+    "/h3ll0w0lrd/assets/images/mvwdq95e-ugjk2u6n.webp",
+    "/h3ll0w0lrd/assets/images/mvwdqg2q-mwuzxl3t.webp",
+    "/h3ll0w0lrd/assets/images/mvwdqwen-moe2wfa0.webp",
+    "/h3ll0w0lrd/assets/images/mvwdrbaj-77y5tw0z.webp"
+  ],
   "platforms": [
     {
       "name": "멜로이",
-      "url": "https://neonachat.io/share.html?id=6a89c776ab9775448f508ced",
+      "url": "https://melloy.io/share?id=6a89c776ab9775448f508ced&lang=ko",
       "status": "공개 중",
       "safety": [
         "세이프티"
+      ]
+    },
+    {
+      "name": "멜로이",
+      "url": "https://melloy.io/share?id=6ada12e9fe79c73799f62a28&lang=ko",
+      "status": "공개 중",
+      "safety": [
+        "언세이프티"
       ]
     },
     {
