@@ -6,3 +6,4 @@ exclude:
   - README.md
   - SETUP.md
   - CMS-GUIDE.md
+  - supabase
