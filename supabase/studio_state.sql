@@ -54,3 +54,14 @@ create policy studio_state_delete on public.studio_state
 revoke all on public.studio_state from anon;
 revoke all on public.studio_state from authenticated;
 grant select, insert, update, delete on public.studio_state to authenticated;
+
+-- 일시 정지 방지용 확인 함수. GitHub Actions(.github/workflows/supabase-keepalive.yml)가 하루 한 번 부릅니다.
+-- 현재 시각만 돌려주며 어떤 표도 읽지 않으므로 공개 키로 불러도 안전합니다.
+create or replace function public.keepalive()
+returns timestamptz
+language sql
+stable
+set search_path = ''
+as $$ select now() $$;
+
+grant execute on function public.keepalive() to anon, authenticated;

@@ -53,3 +53,9 @@ PC와 모바일에서 같은 스튜디오 내용(코멘트·소개페이지)을 
 - secret·service_role 키는 받지 않습니다. 데이터는 로그인한 본인만 읽고 쓸 수 있습니다(RLS).
 - Supabase 무료 프로젝트는 일정 기간 사용이 적으면 일시 정지됩니다. 정지 중에도 편집은 되며, 대시보드에서 다시 켜면 이어서 동기화됩니다.
 
+일시 정지 방지(선택):
+
+- `.github/workflows/supabase-keepalive.yml`이 매일 한 번 확인 요청(`keepalive` 함수 호출)을 보냅니다.
+- 저장소 Settings → Secrets and variables → Actions → **Variables**에 `SUPABASE_URL`, `SUPABASE_KEY`(Publishable 또는 anon 키)를 넣으면 동작하고, 비어 있으면 건너뜁니다. Actions 탭에서 'Run workflow'로 바로 시험할 수 있습니다.
+- 공개 저장소의 예약 실행은 저장소에 60일 동안 커밋이 없으면 GitHub가 멈춥니다. 그때는 Actions 탭에서 다시 켜 주세요.
+
