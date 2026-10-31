@@ -4,7 +4,7 @@ const LABELS={name:'작품명',number:'수집첩 번호',image:'이미지 주소
 let p,output='',timer,dirty=false,loadFailed=false,ctx;
 export const getProfile=()=>p;
 
-function save(){clearTimeout(timer);try{if(loadFailed)throw Error();const prev=localStorage.getItem(STORE);if(prev)localStorage.setItem(BACKUP,prev);localStorage.setItem(STORE,JSON.stringify(p));dirty=false;ctx.status('이 기기에 자동 저장됨');return true;}catch{dirty=true;ctx.status('기기 저장 실패 · 소개페이지 JSON으로 백업해 주세요');return false;}}
+function save(){clearTimeout(timer);try{if(loadFailed)throw Error();const prev=localStorage.getItem(STORE);if(prev)localStorage.setItem(BACKUP,prev);localStorage.setItem(STORE,JSON.stringify(p));dirty=false;ctx.status('이 기기에 자동 저장됨');ctx.saved?.();return true;}catch{dirty=true;ctx.status('기기 저장 실패 · 소개페이지 JSON으로 백업해 주세요');return false;}}
 function changed(){dirty=true;ctx.status('저장 중…');clearTimeout(timer);timer=setTimeout(save,350);if(ctx.visible('p-preview'))renderProfilePreview();}
 export const flushProfile=()=>dirty?save():true;
 // 다른 파일로 교체할 때: 현재 내용을 직전 사본으로 남기고, 새 내용이 저장된 뒤에만 화면에 적용

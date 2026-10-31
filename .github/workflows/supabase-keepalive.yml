@@ -1,0 +1,35 @@
+# Supabase 무료 프로젝트가 사용량 부족으로 일시 정지되지 않도록 하루 한 번 확인 요청을 보냅니다.
+# 저장소 Settings → Secrets and variables → Actions → Variables 에
+#   SUPABASE_URL (Project URL), SUPABASE_KEY (Publishable 또는 anon 키) 를 넣어야 동작합니다. 비어 있으면 건너뜁니다.
+# 루모 스튜디오 동기화는 이 작업이 없어도(서버가 멈춰도) 각 기기 저장으로 계속 편집됩니다.
+name: Supabase 일시 정지 방지
+
+on:
+  schedule:
+    - cron: '17 19 * * *'   # 매일 04:17 (한국 시간)
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: 확인 요청
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "::notice::SUPABASE_URL 또는 SUPABASE_KEY 변수가 없어 건너뜁니다."
+            exit 0
+          fi
+          case "$SUPABASE_KEY" in sb_secret_*) echo "::error::secret 키는 쓰지 마세요. Publishable 키를 넣어 주세요."; exit 1;; esac
+          code=$(curl -sS -o body.txt -w '%{http_code}' -X POST "${SUPABASE_URL%/}/rest/v1/rpc/keepalive" \
+            -H "apikey: $SUPABASE_KEY" -H "Content-Type: application/json" -d '{}' --max-time 60 || echo 000)
+          echo "응답 $code: $(cat body.txt 2>/dev/null)"
+          if [ "$code" != "200" ]; then
+            echo "::warning::확인 요청이 실패했습니다($code). 프로젝트가 이미 일시 정지됐다면 Supabase 대시보드에서 다시 켜 주세요. supabase/studio_state.sql을 실행했는지도 확인하세요."
+            exit 1
+          fi

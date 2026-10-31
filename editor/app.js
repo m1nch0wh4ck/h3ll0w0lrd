@@ -1,13 +1,14 @@
 import {normalize,generate,newKey,esc,safetyLabel,matches,projectOptions} from './renderer.js';
 import {initProfile,renderProfilePreview,getProfile,replaceProfile,flushProfile} from './profile-ui.js';
 import {normalizeProfile} from './profile.js';
+import {initSync,scheduleSync} from './sync.js';
 const $=id=>document.getElementById(id),STORE='mint-comment-mobile-v1',BACKUP=STORE+'-previous';
 let records=[],active='',output='',view='library',mode='comment',timer,messageTimer,dirty=false,loadFailed=false;
 const PREVIEW={comment:'preview',profile:'p-preview'},HOME={comment:'library',profile:'p-basic'},lastView={comment:'library',profile:'p-basic'},wideMQ=matchMedia('(min-width:1100px)');
 const visible=id=>!$(id).hidden;
 const current=()=>records.find(r=>r.key===active);
 function say(s){$('message').textContent=s;clearTimeout(messageTimer);messageTimer=setTimeout(()=>$('message').textContent='',6500);}
-function save(){clearTimeout(timer);try{if(loadFailed)throw Error();const previous=localStorage.getItem(STORE);if(previous)localStorage.setItem(BACKUP,previous);localStorage.setItem(STORE,JSON.stringify({active,records}));dirty=false;$('save-state').textContent='이 기기에 자동 저장됨';return true;}catch{$('save-state').textContent='기기 저장 실패 · JSON으로 백업해 주세요';dirty=true;return false;}}
+function save(){clearTimeout(timer);try{if(loadFailed)throw Error();const previous=localStorage.getItem(STORE);if(previous)localStorage.setItem(BACKUP,previous);localStorage.setItem(STORE,JSON.stringify({active,records}));dirty=false;$('save-state').textContent='이 기기에 자동 저장됨';scheduleSync();return true;}catch{$('save-state').textContent='기기 저장 실패 · JSON으로 백업해 주세요';dirty=true;return false;}}
 function changed(){dirty=true;$('save-state').textContent='저장 중…';clearTimeout(timer);timer=setTimeout(save,350);if(view==='theme'||visible('preview'))renderPreview();}
 // PC 넓은 화면에서는 편집 화면 오른쪽에 미리보기를 함께 둠
 function switchView(next){const wide=wideMQ.matches;if(wide&&next===PREVIEW[mode])next=lastView[mode]!==next?lastView[mode]:(mode==='comment'?'edit':'p-basic');view=lastView[mode]=next;document.body.classList.toggle('wide',wide);document.querySelectorAll('.screen').forEach(s=>{const side=wide&&s.id===PREVIEW[mode];s.hidden=!(s.id===next||side);s.classList.toggle('side',side);});$('nav-comment').hidden=mode!=='comment';$('nav-profile').hidden=mode!=='profile';document.querySelectorAll('[data-view]').forEach(b=>{if(b.dataset.view===next)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});if(next==='library')renderList();if(mode==='comment'&&(next==='theme'||visible('preview')))renderPreview();if(mode==='profile'&&visible('p-preview'))renderProfilePreview();window.scrollTo(0,0);}
@@ -41,7 +42,11 @@ async function importFile(f){if(f.size>10000000)throw Error('10MB 이하의 JSON
  const items=commentItems(v);if(items===null)throw Error('루모 스튜디오에서 저장한 JSON 파일이 아닙니다.');addComments(items);return items.length+'개 캐릭터를 별도로 추가했습니다.';}
 $('import').onclick=()=>$('file').click();document.querySelectorAll('.import-any').forEach(b=>b.onclick=()=>$('file').click());
 $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{say(await importFile(f));}catch(err){say(err.message);}finally{e.target.value='';}};
-document.querySelectorAll('.studio-backup').forEach(b=>b.onclick=()=>{if(dirty)save();flushProfile();download(JSON.stringify({format:'lumo-studio-backup',version:1,exportedAt:new Date().toISOString(),comments:{format:'mint-comment-collection',version:2,records},profile:getProfile()},(k,v)=>k==='open'?undefined:v,2),'lumo-studio-backup.json','application/json');});
+document.querySelectorAll('.studio-backup').forEach(b=>b.onclick=()=>{if(dirty)save();flushProfile();download(JSON.stringify({...studioSnapshot(),exportedAt:new Date().toISOString()},(k,v)=>k==='open'?undefined:v,2),'lumo-studio-backup.json','application/json');});
+// 기기 간 동기화: 스튜디오 전체 백업과 같은 형식을 통째로 주고받음
+function studioSnapshot(){if(dirty)save();flushProfile();return {format:'lumo-studio-backup',version:1,comments:{format:'mint-comment-collection',version:2,records},profile:getProfile()};}
+// 다른 기기 내용 적용. 지금 내용은 기기 저장의 직전 사본으로 남음
+function applyStudio(v){if(v?.format!=='lumo-studio-backup'||v.version!==1)throw Error('서버의 동기화 데이터 형식을 읽을 수 없습니다. 루모 스튜디오를 업데이트해 주세요.');const items=v.comments==null?[]:commentItems(v.comments);if(items===null)throw Error('서버의 코멘트 데이터 형식이 다릅니다.');const prof=v.profile==null?null:normalizeProfile(v.profile);const old={records,active};records=items.length?items:[normalize({work:'새 캐릭터',creator:'m1nch0wh4ck',patches:[]})];active=records.some(r=>r.key===old.active)?old.active:records[0].key;if(!save()){records=old.records;active=old.active;return false;}populate();renderList();if(prof&&!replaceProfile(prof))return false;return true;}
 $('copy').onclick=async()=>{renderPreview();if(output.length>50000)return;try{await navigator.clipboard.writeText(output);say('HTML을 복사했습니다. 루모 제작자 코멘트에 붙여넣어 주세요.');}catch{$('code-details').open=true;$('code').focus();$('code').select();$('code').setSelectionRange(0,output.length);say('코드를 길게 눌러 복사해 주세요.');}};
 $('select-code').onclick=()=>{$('code').focus();$('code').select();$('code').setSelectionRange(0,output.length);};
 $('html-save').onclick=()=>{renderPreview();if(output.length<=50000)download(output,safeName()+'-comment.html','text/html');};
@@ -53,7 +58,8 @@ let installPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDef
 async function init(){try{const raw=localStorage.getItem(STORE);if(raw){const s=JSON.parse(raw);if(!Array.isArray(s.records)||!s.records.length)throw Error();records=s.records.map(normalize);active=records.some(r=>r.key===s.active)?s.active:records[0].key;}}catch{loadFailed=true;$('save-state').textContent='저장 내용 읽기 실패 · 기존 저장소는 덮어쓰지 않습니다';say('저장 내용을 읽지 못했습니다. 보관한 JSON을 불러와 주세요.');}
 if(!records.length){try{records=[normalize(await(await fetch('./sample.json')).json())];}catch{records=[normalize({work:'새 캐릭터',creator:'m1nch0wh4ck',patches:[]})];}active=records[0].key;}
 populate();renderList();if(!loadFailed)save();
-initProfile({say,download,status:s=>{$('save-state').textContent=s;},visible});let m='comment';try{m=localStorage.getItem('lumo-studio-mode')==='profile'?'profile':'comment';}catch{}setMode(m);if('serviceWorker'in navigator){try{const reg=await navigator.serviceWorker.register('./sw.js');await navigator.serviceWorker.ready;$('offline-state').textContent='오프라인 준비 완료 · 이 기기에서 인터넷 없이 편집할 수 있습니다.';reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)say('새 버전이 준비됐습니다. 작업을 저장한 뒤 앱 창을 모두 닫고 다시 열어 주세요.');});});}catch{$('offline-state').textContent='오프라인 준비 실패 · 인터넷 연결 후 다시 열어 주세요.';}}}
+initProfile({say,download,status:s=>{$('save-state').textContent=s;},visible,saved:()=>scheduleSync()});let m='comment';try{m=localStorage.getItem('lumo-studio-mode')==='profile'?'profile':'comment';}catch{}setMode(m);if('serviceWorker'in navigator){try{const reg=await navigator.serviceWorker.register('./sw.js');await navigator.serviceWorker.ready;$('offline-state').textContent='오프라인 준비 완료 · 이 기기에서 인터넷 없이 편집할 수 있습니다.';reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)say('새 버전이 준비됐습니다. 작업을 저장한 뒤 앱 창을 모두 닫고 다시 열어 주세요.');});});}catch{$('offline-state').textContent='오프라인 준비 실패 · 인터넷 연결 후 다시 열어 주세요.';}}
+initSync({getSnapshot:studioSnapshot,applySnapshot:applyStudio,isBlocked:()=>loadFailed,say});}
 init();
 
 for(const id of ['project-filter','safety-filter','search'])$(id).addEventListener(id==='search'?'input':'change',renderList);
