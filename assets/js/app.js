@@ -125,9 +125,12 @@ lightbox.addEventListener('click',e=>{if(e.target===lightbox)lightbox.close();})
 lightbox.addEventListener('close',()=>{if(lb?.trigger?.isConnected)lb.trigger.focus();});
 window.addEventListener('hashchange',()=>{if(lightbox.open)lightbox.close();});
 function readRoute(){
- const hash=location.hash||'#home';
+ let hash=location.hash||'#home';
  const work=hash.match(/^#work\/([a-z0-9-]+)$/);
- if(work){const item=WORKS.find(w=>w.id===work[1]);return item?{key:hash,screen:'work',nav:'collection',label:'COLLECTION / '+item.name,item}:{key:hash,screen:'missing',nav:'collection',label:'NOT FOUND'};}
+ if(work){const item=WORKS.find(w=>w.id===work[1])||WORKS.find(w=>list(w.oldIds).includes(work[1]));
+  // An old shared address (예전 주소용 이름) opens the work and the address bar switches to its current id.
+  if(item&&item.id!==work[1]){history.replaceState(null,'','#work/'+item.id);hash='#work/'+item.id;}
+  return item?{key:hash,screen:'work',nav:'collection',label:'COLLECTION / '+item.name,item}:{key:hash,screen:'missing',nav:'collection',label:'NOT FOUND'};}
  const alias={'#home':'home','#collection':'collection','#notes':'notes','#about':'about','#contact':'about'};
  const screen=alias[hash];return screen?{key:'#'+screen,screen,nav:screen,label:({home:'HOME',collection:'COLLECTION',notes:'LOG',about:'INFO'})[screen]}:{key:hash,screen:'missing',nav:'',label:'NOT FOUND'};
 }

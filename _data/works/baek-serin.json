@@ -1,5 +1,8 @@
 {
   "id": "paik-serin",
+  "oldIds": [
+    "baek-serin"
+  ],
   "name": "백세린",
   "number": "02",
   "image": "/h3ll0w0lrd/assets/images/baek-serin.webp",

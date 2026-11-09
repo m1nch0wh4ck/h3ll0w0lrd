@@ -35,6 +35,12 @@ content:
     required: true
     pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
     description: '예: seo-yunhwa. 작품마다 다르게, 영문 소문자·숫자·하이픈만 사용하세요. 공개 후에는 유지해 주세요.'
+  - name: oldIds
+    label: 예전 주소용 이름
+    type: string
+    list: true
+    pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+    description: 주소용 이름을 바꿨을 때만 예전 이름을 적어 두세요. 예전에 공유한 작품 주소로 들어와도 이 작품이 열립니다.
   - name: name
     label: 작품명
     type: string
