@@ -26,6 +26,7 @@ COMING NEXT · LOG · INFO 글 관리는 [CMS-GUIDE.md](CMS-GUIDE.md)를 보세�
 | data/site.json | Jekyll이 COMING NEXT·LOG·INFO를 합쳐 내보내는 파일 |
 | .pages.yml | 작품·COMING NEXT·LOG·INFO 관리 양식 |
 | _config.yml | GitHub Pages 설정 |
+| .github/workflows/auto-log.yml | 작품 상태가 바뀌면 LOG 자동 기록 |
 | editor/ | 루모 스튜디오(제작자 코멘트·제작자 소개페이지 HTML 편집기, 설치형 웹앱). 홈페이지 data/works.json을 읽기만 함 |
 | supabase/studio_state.sql | 루모 스튜디오 기기 간 동기화용 데이터베이스 설정(Supabase SQL Editor에서 한 번 실행) |
 

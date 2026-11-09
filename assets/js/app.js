@@ -12,11 +12,15 @@
  const paragraphs=t=>str(t).replace(/\r\n?/g,'\n').split(/\n[ \t]*\n+/).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${lines(s)}</p>`).join('');
  const DATE=/^(\d{4})-(\d{2})-(\d{2})$/;
  const byId=(a,b)=>str(a.id).localeCompare(str(b.id));
- function renderUpcoming(data){
+ function renderUpcoming(data,allWorks){
   const num=v=>v===''||v==null||!isFinite(v)?Infinity:Number(v);
-  const list=items(data).sort((a,b)=>num(a.order)-num(b.order)||str(a.title).localeCompare(str(b.title),'ko')||byId(a,b));
+  const manual=items(data).sort((a,b)=>num(a.order)-num(b.order)||str(a.title).localeCompare(str(b.title),'ko')||byId(a,b));
+  // Platforms marked 제작 중 / 리뉴얼 예정 in the work collection follow the hand-written items automatically.
+  const works=Object.values(allWorks&&typeof allWorks==='object'?allWorks:{}).filter(w=>w&&/^[a-z0-9-]+$/.test(w.id)&&str(w.name)).sort((a,b)=>String(a.number||'').localeCompare(String(b.number||''),undefined,{numeric:true}));
+  const auto=works.flatMap(w=>(Array.isArray(w.platforms)?w.platforms:[]).filter(p=>p&&['제작 중','리뉴얼 예정'].includes(p.status)).map(p=>({title:[str(w.name),[str(p.name),(Array.isArray(p.safety)?p.safety:[]).join('/')].filter(Boolean).join(' ')].join(' · '),status:p.status,link:'#work/'+w.id})));
+  const list=[...manual,...auto];
   const box=$('home-news');
-  box.innerHTML=list.length?'<h2>COMING NEXT</h2>'+list.map(x=>{const href=safeLink(x.link);const title=href?`<a ${linkAttrs(href)}>${esc(str(x.title))}</a>`:`<span class="news-title">${esc(str(x.title))}</span>`;return `<div class="news-item">${str(x.status)?`<span class="news-status">${esc(str(x.status))}</span>`:''}${title}${str(x.summary)?`<small>${lines(str(x.summary))}</small>`:''}</div>`;}).join(''):'';
+  box.innerHTML=list.length?'<h2>COMING NEXT</h2><div class="news-list">'+list.map(x=>{const href=safeLink(x.link);const title=href?`<a ${linkAttrs(href)}>${esc(str(x.title))}</a>`:`<span class="news-title">${esc(str(x.title))}</span>`;return `<div class="news-item">${str(x.status)?`<span class="news-status">${esc(str(x.status))}</span>`:''}${title}${str(x.summary)?`<small>${lines(str(x.summary))}</small>`:''}</div>`;}).join('')+'</div>':'';
   box.hidden=!list.length;
  }
  function renderLogs(data){
@@ -60,7 +64,7 @@
   const response=await fetch('data/site.json',{cache:'no-cache'});
   if(!response.ok)throw new Error('홈페이지 정보를 불러오지 못했습니다.');
   const data=await response.json()||{};
-  for(const [name,fn] of [['upcoming',renderUpcoming],['logs',renderLogs],['info',renderInfo]]){try{fn(data[name]);}catch(error){console.error(name,error);}}
+  for(const [name,fn] of [['upcoming',renderUpcoming],['logs',renderLogs],['info',renderInfo]]){try{fn(data[name],data.works);}catch(error){console.error(name,error);}}
  }catch(error){
   console.error(error);
   $('log-empty').textContent='기록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';$('log-empty').hidden=false;
