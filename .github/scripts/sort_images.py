@@ -3,7 +3,7 @@
 
 Pages CMS uploads into whichever folder is open in its image window, usually the top level.
 After a work is saved, this moves each top-level image the work uses into
-assets/images/works/<주소용 이름>/ (cover), .../gallery/, .../persona/ or .../profile/
+assets/images/works/<주소용 이름>/ (cover), .../gallery/, .../secret/, .../persona/ or .../profile/
 and rewrites the paths in the work's JSON. File names are never changed.
 
 If a JSON points at a file that is no longer where it says (for example a CMS form that was
@@ -45,6 +45,8 @@ def main():
         plan(work.get('image'), folder)
         for url in work.get('gallery') or []:
             plan(url, folder + '/gallery')
+        for url in work.get('secretGallery') or []:
+            plan(url, folder + '/secret')
         for key, sub in (('personas', 'persona'), ('profiles', 'profile')):
             for item in work.get(key) or []:
                 if isinstance(item, dict):

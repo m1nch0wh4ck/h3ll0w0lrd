@@ -164,6 +164,12 @@ content:
     label: 추가 이미지
     type: image
     list: true
+    description: 작품 페이지 갤러리에 보이고, 카드 뽑기에 ★★ 카드로 나옵니다.
+  - name: secretGallery
+    label: 뽑기 한정 이미지
+    type: image
+    list: true
+    description: 작품 페이지 갤러리에서는 물음표와 흐림으로 가려지고, 카드 뽑기에서 ★★★ 카드로 뽑은 사람에게만 열립니다. 화면에서만 가리는 것이라 공개 저장소의 파일 주소를 아는 사람은 볼 수 있습니다. 정말 비공개여야 하는 이미지는 올리지 마세요.
   - name: platforms
     label: 플레이 플랫폼 / 버전
     type: object

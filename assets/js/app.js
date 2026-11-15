@@ -1,5 +1,13 @@
 // Small window buttons (– □ ×) drawn in the title bar of card and memo windows.
 const WINDOW_CONTROLS='<svg aria-hidden="true" width="52" height="16" viewBox="0 0 52 16"><path fill="#c6ccc7" d="M0 0h16v16H0zM18 0h16v16H18zM36 0h16v16H36z"/><path fill="none" stroke="#141615" stroke-width="2" d="M4 11h7M22 5h8M22 5v7h8V5M40 4l8 8M48 4l-8 8"/></svg>';
+// Cards pulled in the card draw (assets/js/fun.js) are remembered in this browser only.
+// A card is named by its work and file name, so moving an image to another folder keeps it.
+const MintDex={
+ key:(workId,src)=>workId+'/'+String(src).split('/').pop(),
+ read(){try{const d=JSON.parse(localStorage.getItem('mint-dex-v1'));return d&&typeof d==='object'?d:{};}catch{return {};}},
+ has(workId,src){return this.read()[this.key(workId,src)]>0;},
+ add(workId,src){const d=this.read(),k=this.key(workId,src);d[k]=(d[k]||0)+1;try{localStorage.setItem('mint-dex-v1',JSON.stringify(d));}catch{}return d[k];}
+};
 // COMING NEXT / LOG / INFO are edited in Pages CMS (_data/upcoming, _data/logs, _data/info.json) and exported by data/site.json.
 // Loaded separately so a problem here never hides the work collection.
 (async function(){
@@ -102,11 +110,13 @@ try {
   personas:list(w.personas).filter(p=>p&&typeof p==='object'&&p.name).map(persona),
   image:safeURL(w.image),genres:list(w.genres),romance:list(w.romance),keywords:list(w.keywords),
   gallery:list(w.gallery).map(safeURL).filter(Boolean),
+  // 뽑기 한정 이미지: shown blurred in the gallery until the visitor pulls that card.
+  secret:list(w.secretGallery).map(safeURL).filter(Boolean),
   platforms:list(w.platforms).map(p=>({...p,url:safeURL(p.url),safety:list(p.safety).map(safeName)}))
  })).sort((a,b)=>a.number.localeCompare(b.number,undefined,{numeric:true}));
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const viewport=$('screen-viewport');let currentRoute=null;const scrollPositions=new Map();let lastCard=null;
+const viewport=$('screen-viewport');let currentRoute=null,currentWork=null;const scrollPositions=new Map();let lastCard=null;
 function matchesWork(w){
  const q=$('search').value.trim().toLowerCase();
  if(![w.name,w.tagline||'',w.descText,...w.keywords,...w.genres].join(' ').toLowerCase().includes(q))return false;
@@ -196,25 +206,33 @@ function playSection(w){
  const groups=names.map(n=>`<div class="play-group">${platformTag(n)}${w.platforms.filter(p=>p.name===n).map(p=>`<div class="play-row"><span class="play-what">${p.safety.length?`<b>${safeText(p.safety)}</b>`:''}${statusChip(p.status)}${versionOf(w,p)?`<span class="ver">v${versionOf(w,p)}</span>`:''}${p.releaseNote?`<small>${esc(p.releaseNote)}</small>`:''}</span>${p.url?`<a class="btn btn-s" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc([p.name,...p.safety.map(safeName)].filter(Boolean).join(' '))} 열기 (새 창)">열기</a>`:''}</div>`).join('')}</div>`).join('');
  return `<section class="play" aria-labelledby="play-title"><h3 id="play-title">플레이</h3>${groups}${w.platforms.some(p=>p.url)?'':'<p class="play-none">작품 바로가기 링크를 준비하고 있습니다.</p>'}<button type="button" class="btn btn-s" id="copy-link">이 작품 링크 복사</button><p id="share-state" class="share-state" role="status"></p></section>`;
 }
-function showWork(w){document.title=`${w.name} · 민초파왹`;const meta=[...w.genres,w.type,...w.romance,...w.keywords].filter(Boolean);$('detail-content').innerHTML=`<a class="back" href="#collection"><svg aria-hidden="true" width="14" height="12" viewBox="0 0 14 12"><path d="M14 6H2M7 1L2 6l5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>수집첩으로 돌아가기</a><div class="detail-header"><div class="detail-cover${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="${esc(w.name)}">`:esc(w.name)}</div><div class="detail-main"><div class="detail-title"><span class="mono">COLLECTION / No.${esc(w.number)}</span><h2 id="detail-title">${esc(w.name)}</h2>${w.tagline?`<p class="detail-tagline">${esc(w.tagline)}</p>`:''}${meta.length?`<p class="detail-tags">${meta.map(esc).join(' · ')}</p>`:''}</div>${playSection(w)}</div></div>${detailTabs(introBlock(w)+personaBlock(w)+startBlock(w)+block('플레이 안내',w.notes),profileBlock(w)+galleryViewer(w))}`;bindTabs();$('copy-link').addEventListener('click',copyLink);mountIntro(w);if(w.gallery.length)bindViewer(w);}
+function showWork(w){currentWork=w;document.title=`${w.name} · 민초파왹`;const meta=[...w.genres,w.type,...w.romance,...w.keywords].filter(Boolean);$('detail-content').innerHTML=`<a class="back" href="#collection"><svg aria-hidden="true" width="14" height="12" viewBox="0 0 14 12"><path d="M14 6H2M7 1L2 6l5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>수집첩으로 돌아가기</a><div class="detail-header"><div class="detail-cover${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="${esc(w.name)}">`:esc(w.name)}</div><div class="detail-main"><div class="detail-title"><span class="mono">COLLECTION / No.${esc(w.number)}</span><h2 id="detail-title">${esc(w.name)}</h2>${w.tagline?`<p class="detail-tagline">${esc(w.tagline)}</p>`:''}${meta.length?`<p class="detail-tags">${meta.map(esc).join(' · ')}</p>`:''}</div>${playSection(w)}</div></div>${detailTabs(introBlock(w)+personaBlock(w)+startBlock(w)+block('플레이 안내',w.notes),profileBlock(w)+galleryViewer(w))}`;bindTabs();$('copy-link').addEventListener('click',copyLink);mountIntro(w);if(shots(w).length)bindViewer(w);}
 // Gallery: an old-style image viewer window (preview + thumbnail list); the preview opens the original in a dialog.
+// 뽑기 한정 images come after the open ones and stay blurred behind a ? until their card is pulled.
 const imgName=i=>'IMG_'+String(i+1).padStart(2,'0');
-function galleryViewer(w){if(!w.gallery.length)return '';return `<section class="detail-block"><h3>이미지 갤러리</h3><div class="viewer"><div class="viewer-bar"><span>gallery_viewer.exe — ${esc(w.name)}</span><span aria-hidden="true">_ □ ×</span></div><div class="viewer-body"><button type="button" class="viewer-preview" id="viewer-open" aria-label="원본 크게 보기"><img id="viewer-main" src="${esc(w.gallery[0])}" alt="${esc(w.name)} ${imgName(0)}"></button><ul class="viewer-thumbs" aria-label="${esc(w.name)} 이미지 목록">${w.gallery.map((src,i)=>`<li><button type="button" class="viewer-thumb" data-i="${i}" aria-pressed="${i===0}" aria-label="${imgName(i)} 미리보기"><span class="viewer-thumb-art"><img src="${esc(src)}" alt="" loading="lazy"></span><span>${imgName(i)}</span><small></small></button></li>`).join('')}</ul></div><div class="viewer-status"><span>${w.gallery.length} object(s)</span><span id="viewer-info">${imgName(0)}</span><span class="viewer-tip">미리보기를 누르면 원본 크게 보기</span></div></div></section>`;}
+const shots=w=>[...w.gallery.map(src=>({src})),...w.secret.map(src=>({src,locked:!MintDex.has(w.id,src)}))].map((x,i)=>({...x,name:x.locked?'???':imgName(i)}));
+function galleryViewer(w){const all=shots(w);if(!all.length)return '';return `<section class="detail-block"><h3>이미지 갤러리</h3><div class="viewer"><div class="viewer-bar"><span>gallery_viewer.exe — ${esc(w.name)}</span><span aria-hidden="true">_ □ ×</span></div><div class="viewer-body"><button type="button" class="viewer-preview" id="viewer-open"><img id="viewer-main" src="${esc(all[0].src)}" alt=""><b class="lock-mark" aria-hidden="true">?</b></button><ul class="viewer-thumbs" aria-label="${esc(w.name)} 이미지 목록">${all.map((x,i)=>`<li><button type="button" class="viewer-thumb" data-i="${i}" aria-pressed="${i===0}" aria-label="${x.locked?'잠긴 뽑기 한정 이미지':x.name+' 미리보기'}"><span class="viewer-thumb-art${x.locked?' locked':''}"><img src="${esc(x.src)}" alt="" loading="lazy">${x.locked?'<b class="lock-mark" aria-hidden="true">?</b>':''}</span><span>${x.name}</span><small>${x.locked?'뽑기 한정':''}</small></button></li>`).join('')}</ul></div><div class="viewer-status"><span>${all.length} object(s)</span><span id="viewer-info"></span><span class="viewer-tip">미리보기를 누르면 원본 크게 보기</span></div></div></section>`;}
 function bindViewer(w){
+ const all=shots(w);const open=all.filter(x=>!x.locked);
  let cur=0;const thumbs=[...document.querySelectorAll('.viewer-thumb')];const sizes=[];
- const info=()=>{$('viewer-info').textContent=imgName(cur)+(sizes[cur]?' · '+sizes[cur]:'');};
- thumbs.forEach((b,i)=>{const img=b.querySelector('img');const done=()=>{if(img.naturalWidth){sizes[i]=img.naturalWidth+'×'+img.naturalHeight;b.querySelector('small').textContent=sizes[i];if(i===cur)info();}};if(img.complete)done();else img.addEventListener('load',done);});
- const select=i=>{cur=i;$('viewer-main').src=w.gallery[i];$('viewer-main').alt=`${w.name} ${imgName(i)}`;thumbs.forEach((b,j)=>b.setAttribute('aria-pressed',String(j===i)));info();};
+ const info=()=>{$('viewer-info').textContent=all[cur].locked?'카드 뽑기에서 뽑으면 열립니다':all[cur].name+(sizes[cur]?' · '+sizes[cur]:'');};
+ thumbs.forEach((b,i)=>{if(all[i].locked)return;const img=b.querySelector('img');const done=()=>{if(img.naturalWidth){sizes[i]=img.naturalWidth+'×'+img.naturalHeight;b.querySelector('small').textContent=sizes[i];if(i===cur)info();}};if(img.complete)done();else img.addEventListener('load',done);});
+ const select=i=>{cur=i;const x=all[i];$('viewer-main').src=x.src;$('viewer-main').alt=x.locked?'':`${w.name} ${x.name}`;$('viewer-open').classList.toggle('locked',!!x.locked);$('viewer-open').setAttribute('aria-label',x.locked?'잠긴 이미지 — 카드 뽑기 열기':'원본 크게 보기');thumbs.forEach((b,j)=>b.setAttribute('aria-pressed',String(j===i)));info();};
+ // A locked image opens the card draw instead of the original.
+ const show=(i,trigger)=>{if(all[i].locked)window.dispatchEvent(new Event('mint:gacha'));else openLightbox(w,open,open.indexOf(all[i]),trigger);};
  $('detail-content').querySelector('.viewer-thumbs').addEventListener('click',e=>{const b=e.target.closest('.viewer-thumb');if(b)select(Number(b.dataset.i));});
- $('detail-content').querySelector('.viewer-thumbs').addEventListener('dblclick',e=>{const b=e.target.closest('.viewer-thumb');if(b)openLightbox(w,Number(b.dataset.i),b);});
- $('viewer-open').addEventListener('click',()=>openLightbox(w,cur,$('viewer-open')));
+ $('detail-content').querySelector('.viewer-thumbs').addEventListener('dblclick',e=>{const b=e.target.closest('.viewer-thumb');if(b)show(Number(b.dataset.i),b);});
+ $('viewer-open').addEventListener('click',()=>show(cur,$('viewer-open')));
+ select(0);
 }
+// A newly pulled card unlocks its image on the page that is open.
+window.addEventListener('mint:dex',()=>{const v=$('detail-content').querySelector('.viewer');if(!v||!currentWork)return;v.closest('.detail-block').outerHTML=galleryViewer(currentWork);bindViewer(currentWork);});
 const lightbox=$('lightbox');let lb=null;
-function showLightbox(i){const n=lb.w.gallery.length;lb.i=(i+n)%n;const src=lb.w.gallery[lb.i];$('lightbox-img').src=src;$('lightbox-img').alt=`${lb.w.name} ${imgName(lb.i)}`;$('lightbox-title').textContent=`${lb.w.name} — ${imgName(lb.i)} (${lb.i+1}/${n})`;$('lightbox-raw').href=src;$('lightbox-size').textContent='';$('lightbox-prev').hidden=$('lightbox-next').hidden=n<2;}
-function openLightbox(w,i,trigger){lb={w,i,trigger};showLightbox(i);if(!lightbox.open)lightbox.showModal();}
+function showLightbox(i){const n=lb.list.length;lb.i=(i+n)%n;const {src,name}=lb.list[lb.i];$('lightbox-img').src=src;$('lightbox-img').alt=`${lb.w.name} ${name}`;$('lightbox-title').textContent=`${lb.w.name} — ${name} (${lb.i+1}/${n})`;$('lightbox-raw').href=src;$('lightbox-size').textContent='';$('lightbox-prev').hidden=$('lightbox-next').hidden=n<2;}
+function openLightbox(w,list,i,trigger){lb={w,list,i,trigger};showLightbox(i);if(!lightbox.open)lightbox.showModal();}
 $('lightbox-img').addEventListener('load',()=>{const img=$('lightbox-img');$('lightbox-size').textContent=img.naturalWidth+'×'+img.naturalHeight;});
 $('lightbox-prev').addEventListener('click',()=>showLightbox(lb.i-1));$('lightbox-next').addEventListener('click',()=>showLightbox(lb.i+1));$('lightbox-close').addEventListener('click',()=>lightbox.close());
-lightbox.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'&&lb.w.gallery.length>1)showLightbox(lb.i-1);if(e.key==='ArrowRight'&&lb.w.gallery.length>1)showLightbox(lb.i+1);});
+lightbox.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'&&lb.list.length>1)showLightbox(lb.i-1);if(e.key==='ArrowRight'&&lb.list.length>1)showLightbox(lb.i+1);});
 lightbox.addEventListener('click',e=>{if(e.target===lightbox)lightbox.close();});
 lightbox.addEventListener('close',()=>{if(lb?.trigger?.isConnected)lb.trigger.focus();});
 window.addEventListener('hashchange',()=>{if(lightbox.open)lightbox.close();});
