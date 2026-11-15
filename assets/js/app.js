@@ -160,8 +160,18 @@ function introBlock(w){
 // The frame grows with its content (images loading, <details> opening, tabs switching), so it never scrolls on its own.
 function mountIntro(w){
  const frame=$('intro-frame');if(!frame)return;
- const fit=()=>{const d=frame.contentDocument;if(d&&d.body)frame.style.height=Math.ceil(d.body.getBoundingClientRect().height)+'px';};
+ // An intro narrower than the frame (its own max-width) pulls the frame in to that width, so no empty band is left beside it.
+ // Only elements that limit their own width count; wrappers that just fill the frame are looked through, keeping their padding.
+ const natural=box=>{const cs=getComputedStyle(box),full=box.getBoundingClientRect().width,inner=box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),extra=full-inner;
+  const kids=[...box.children].filter(el=>!/^(STYLE|SCRIPT|LINK)$/.test(el.tagName)&&el.getBoundingClientRect().width>0);if(!kids.length)return full;
+  const limited=el=>getComputedStyle(el).maxWidth!=='none'&&el.getBoundingClientRect().width<inner-1;
+  if(kids.every(limited))return extra+Math.max(...kids.map(el=>el.getBoundingClientRect().width));
+  return kids.length===1?extra+natural(kids[0]):full;};
+ // The width is measured only while the frame has its full width: a frame already pulled in would make the intro look narrower still.
+ const fit=()=>{const d=frame.contentDocument;if(!d||!d.body)return;if(!frame.style.width){const wide=Math.ceil(natural(d.body))+2;if(wide<frame.getBoundingClientRect().width-1)frame.style.width=wide+'px';}frame.style.height=Math.ceil(d.body.getBoundingClientRect().height)+'px';};
  frame.addEventListener('load',()=>{fit();const d=frame.contentDocument;if(d&&d.body&&'ResizeObserver' in window)new ResizeObserver(fit).observe(d.body);});
+ // A resized window gives the intro its full room back before it is measured again.
+ window.addEventListener('resize',()=>{if(frame.isConnected){frame.style.width='';fit();}});
  frame.srcdoc=`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base target="_blank"><style>html,body{margin:0}body{display:flow-root;overflow-x:hidden;word-break:keep-all}img{max-width:100%}</style></head><body>${cleanIntro(w.description)}</body></html>`;
 }
 // 캐릭터 프로필: the creator's own setting sheet, drawn as an old paint-program window.

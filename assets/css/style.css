@@ -235,7 +235,7 @@ img{display:block;max-width:100%}
 .tab-panel{display:flex;flex-direction:column;gap:48px;margin-top:-16px}
 .tab-panel>.detail-block:first-child{padding-top:0;border-top:0}
 /* 작품 소개: the platform's intro page, shown as made, across the full width of the page */
-.intro-frame{display:block;width:100%;max-width:900px;height:320px;border:1px solid var(--ink);background:#fff}
+.intro-frame{display:block;width:100%;max-width:900px;margin:0 auto;height:320px;border:1px solid var(--ink);background:#fff}
 /* 캐릭터 프로필: an old paint-program window (tools and colours are decoration) */
 .paint{display:flex;flex-direction:column;gap:4px;padding:4px;background:var(--face);border:1px solid var(--ink);box-shadow:var(--raised)}
 .paint+.paint{margin-top:12px}
