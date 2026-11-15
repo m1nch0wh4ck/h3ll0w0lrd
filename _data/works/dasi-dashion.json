@@ -2,6 +2,7 @@
   "id": "dasi-dashion",
   "name": "다시, 다시온",
   "number": "08",
+  "tagline": "다시온 프라자, 현재 영업중입니다 ― 당신을 위해서라고 말하는, 일곱의 환대.",
   "genres": [
     "현대",
     "미스터리"
@@ -11,6 +12,28 @@
     "ALL"
   ],
   "keywords": [
-    "도시전설"
+    "도시전설",
+    "오브젝트헤드",
+    "인외",
+    "위어드코어"
+  ],
+  "gallery": [
+    "/h3ll0w0lrd/assets/images/mwhmhx4i-pofm0ccd.jpg",
+    "/h3ll0w0lrd/assets/images/mwhmizht-zbtdac8p.jpg",
+    "/h3ll0w0lrd/assets/images/mwhmjff6-ktgsonja.jpg",
+    "/h3ll0w0lrd/assets/images/mwhmjx2a-o8io8nbe.jpg",
+    "/h3ll0w0lrd/assets/images/mwhmjq9w-5nrqep9b.jpg",
+    "/h3ll0w0lrd/assets/images/mwhmk40h-iw0cmn0a.jpg",
+    "/h3ll0w0lrd/assets/images/mwhmk9jt-4l5ymjrt.jpg"
+  ],
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://melloy.io/share?id=6ae351655f816360d72688e6&lang=ko",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    }
   ]
 }
