@@ -1,0 +1,33 @@
+{
+  "id": "tak-youngjin",
+  "name": "탁영진",
+  "number": "09",
+  "image": "/h3ll0w0lrd/assets/images/mwhn4w7n-sj9x0pb5.jpg",
+  "tagline": "먹여주는 손인지, 물어뜯을 입인지. 해가 지면 분간이 서지 않는다.",
+  "genres": [
+    "현대",
+    "로맨스"
+  ],
+  "type": "1인",
+  "romance": [
+    "ALL"
+  ],
+  "platforms": [
+    {
+      "name": "멜로이",
+      "url": "https://melloy.io/share?id=6ae351655f816360d72688e6&lang=ko",
+      "status": "공개 중",
+      "safety": [
+        "세이프티"
+      ]
+    },
+    {
+      "name": "멜로이",
+      "url": "https://melloy.io/share?id=6aceb77c511dc9174ff35687&lang=ko",
+      "status": "공개 중",
+      "safety": [
+        "언세이프티"
+      ]
+    }
+  ]
+}
