@@ -443,8 +443,9 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .gacha-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:10px}
 .gacha-actions[hidden]{display:none}
 .gacha-actions .btn:disabled{opacity:.45;cursor:default;transform:none}
-.gacha-left{font:14px/1 var(--mono)}
-.gacha-odds{margin-top:14px;color:var(--muted);font:12px/1.5 var(--mono);white-space:pre-wrap}
+.gacha-left{margin-top:10px;color:var(--muted);font:12px/1.5 var(--mono)}
+.gacha-left.none{color:#ff13f0;font-weight:600}
+.gacha-odds{margin-top:2px;color:var(--muted);font:12px/1.5 var(--mono);white-space:pre-wrap}
 /* Card: back (UFO + ?) and front (picture, stars, name plate); .flipped shows the front */
 .gcard{--frame:var(--silver);width:200px;aspect-ratio:2/3.2;flex:0 0 auto}
 .gcard.t2{--frame:var(--mint)}
