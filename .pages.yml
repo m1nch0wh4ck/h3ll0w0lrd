@@ -118,6 +118,22 @@ content:
     - name: description
       label: 설명
       type: text
+  - name: profiles
+    label: 캐릭터 프로필
+    type: object
+    list: true
+    description: 제작자가 정리한 설정값 프로필입니다. 작품 상세에 그림판 창 모양으로 나옵니다. 다인 작품은 캐릭터마다 하나씩 추가하세요.
+    fields:
+    - name: name
+      label: 캐릭터 이름
+      type: string
+    - name: image
+      label: 전신 이미지 (배경 투명 PNG 권장)
+      type: image
+    - name: text
+      label: 프로필
+      type: text
+      description: "한 줄에 하나씩 적으세요. '나이: 29'처럼 '항목: 내용' 형식이면 항목과 내용이 나란히 정렬되고, 콜론이 없는 줄은 한 줄 글로 나옵니다."
   - name: start
     label: 시작 상황
     type: text
