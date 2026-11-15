@@ -402,8 +402,18 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   dialog{box-shadow:4px 4px var(--mint);max-height:94dvh}
 }
 /* ---- Extras (assets/js/fun.js): card draw, ask window, easter eggs ---- */
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
-.head-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.addr-card{width:44px;padding:0}
+/* INFO: card draw strip above the ask strip */
+.draw-banner{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:24px var(--gut);background:var(--ink);color:var(--paper);border-top:2px solid var(--ink)}
+.draw-banner[hidden]{display:none}
+.draw-text{flex:1;min-width:200px}
+.draw-banner h2{color:var(--mint);font:700 24px/1.4 var(--px)}
+.draw-banner p span{display:block;margin-top:2px;color:var(--silver);font:13px/1.5 var(--mono)}
+.draw-banner .btn-p{background:var(--mint);color:var(--ink)}
+.draw-fan{position:relative;flex:0 0 auto;width:96px;height:84px}
+.draw-fan i{position:absolute;left:28px;top:6px;width:44px;height:70px;border:3px solid var(--mint);background:repeating-linear-gradient(135deg,#141615 0 6px,#2b302d 6px 12px) center/cover;transform-origin:50% 100%}
+.draw-fan i:nth-child(1){transform:rotate(-18deg) translateX(-14px);border-color:var(--silver)}
+.draw-fan i:nth-child(3){transform:rotate(18deg) translateX(14px);border-color:#ff3688}
 /* Gallery images that open only after their card is pulled */
 .viewer-preview,.viewer-thumb-art{position:relative;overflow:hidden}
 .lock-mark{display:none;position:absolute;inset:0;place-items:center;color:var(--mint);font:700 64px/1 var(--px);text-shadow:3px 3px var(--ink)}
@@ -440,6 +450,8 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .gcard-back span{width:44%}
 .gcard-back svg{display:block;width:100%}
 .gcard-back b{font:700 40px/1 var(--px)}
+.gcard-back.art{display:block;background:var(--ink)}
+.gcard-back.art img{display:block;width:100%;height:100%;object-fit:cover}
 .gcard-front{display:flex;flex-direction:column;transform:rotateY(180deg)}
 .gcard-front img{flex:1;min-height:0;width:100%;object-fit:cover;object-position:50% 20%}
 .gcard-tier{position:absolute;top:0;left:0;padding:2px 6px;background:var(--frame);color:var(--ink);font:700 12px/1.4 var(--mono);letter-spacing:1px}
@@ -490,13 +502,21 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .mintscreen-face{font-size:64px;line-height:1}
 .mintscreen h2{margin:16px 0;font:700 22px/1.4 var(--px);overflow-wrap:anywhere}
 .mintscreen-code{margin-top:16px;font:13px/1.6 var(--mono);overflow-wrap:anywhere}
+.mintscreen h2,.mintscreen p{white-space:pre-line}
 .mintscreen-tip{margin-top:24px;animation:gblink 1.1s steps(2) infinite}
+.mintscreen.glitch{animation:mflash .65s steps(1)}
+.mintscreen.glitch>div{animation:mglitch .65s steps(1)}
+@keyframes mflash{0%{background:var(--mint);color:var(--ink)}24%{background:var(--ink);color:var(--mint)}36%{background:var(--mint);color:var(--ink)}60%{background:#ff3688;color:var(--ink)}68%{background:var(--mint);color:var(--ink)}}
+@keyframes mglitch{0%{transform:none}8%{transform:translate(-10px,2px) skewX(-8deg);text-shadow:5px 0 #ff3688,-5px 0 #1f3fbf}16%{transform:translate(12px,-3px);clip-path:inset(8% 0 58% 0)}24%{transform:translate(-14px,5px) skewX(10deg);clip-path:inset(55% 0 6% 0);text-shadow:-6px 0 #ff3688,6px 0 #1f3fbf}36%{transform:translate(6px,0);clip-path:none;text-shadow:none}48%{transform:translate(-4px,-2px) scaleY(1.04);clip-path:inset(30% 0 34% 0);text-shadow:4px 0 #ff3688,-4px 0 #1f3fbf}60%{transform:translate(8px,2px) skewX(-4deg);clip-path:none}72%{transform:translate(-3px,0);text-shadow:2px 0 #ff3688,-2px 0 #1f3fbf}84%{transform:none;text-shadow:none}}
 @keyframes gblink{50%{opacity:.25}}
 .saver{position:fixed;inset:0;z-index:55;background:#050806;overflow:hidden;cursor:none}
 .saver i{position:absolute;left:0;top:0;will-change:transform}
+.saver i img{display:block;height:96px;width:auto}
 .saver p{position:absolute;left:0;right:0;bottom:16px;color:#535c56;font:12px/1 var(--mono);text-align:center}
 @media(max-width:780px){
-  .hero-actions .home-cta{flex:1;width:auto;padding:0 10px}
+  .draw-banner{gap:14px;padding:20px var(--gut)}
+  .draw-banner .btn{width:100%}
+  .draw-fan{display:none}
   .gacha-panel{padding:12px}
   .gcard-stage{min-height:290px}
   .gcard{width:172px}
@@ -505,5 +525,5 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   .mintscreen{font-size:14px}
   .mintscreen h2{font-size:17px}
 }
-@media(prefers-reduced-motion:reduce){.gcard.shake,.gcard.t3 .gcard-front::after,.mintscreen-tip{animation:none}}
+@media(prefers-reduced-motion:reduce){.gcard.shake,.gcard.t3 .gcard-front::after,.mintscreen-tip,.mintscreen.glitch,.mintscreen.glitch>div{animation:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}

@@ -11,7 +11,7 @@ const DAILY=5;                       // free draws per day (resets at midnight o
 const EGG_BONUS=2;                   // extra draws for each easter egg found for the first time
 const ODDS={1:60,2:35,3:5};          // ★ cover image, ★★ gallery image, ★★★ 뽑기 한정 image (percent)
 const IDLE_MS=120000;                // screensaver after this long without any input
-const ALIEN_LINES=['민초는 치약 맛이 아니다. 치약이 민초 맛인 것이다.','지구인 관찰 일지: 또 누른다.','초코칩은 추가가 기본값이다.','이 행성의 민초 보급률은 아직 낮다.','누른다고 아이스크림이 나오진 않는다. 카드는 나올지도.','교신 상태 양호. 민트 농도 양호.'];
+// Card back, screensaver picture and the alien's lines are edited in Pages CMS (_data/fun.json, '카드 뽑기 · 꾸미기').
 // --------------------------------------------------------------------------------------------
 
 // Draw tickets and found easter eggs, kept in this browser only.
@@ -26,7 +26,7 @@ const EGGS=['mintscreen','alien','saver'];
 function foundEgg(name){const s=load();if(s.eggs.includes(name))return;s.eggs.push(name);s.bonus+=EGG_BONUS;save(s);toast(`이스터에그 발견! (${s.eggs.length}/${EGGS.length}) 뽑기권 +${EGG_BONUS}`);renderLeft();}
 
 // ---- Card draw ----------------------------------------------------------------------------
-let CARDS=[];
+let CARDS=[],FUN={};
 const STARS=t=>'★'.repeat(t);
 const safeURL=v=>{if(typeof v!=='string'||!v.trim())return '';try{const u=new URL(v,location.href);return ['https:','http:'].includes(u.protocol)?v:'';}catch{return '';}};
 try{
@@ -36,6 +36,10 @@ try{
  for(const w of works){const work={id:w.id,name:String(w.name),number:String(w.number||'')};
   [[urls([w.image]),1],[urls(w.gallery),2],[urls(w.secretGallery),3]].forEach(([list,tier])=>list.forEach(src=>CARDS.push({work,src,tier})));}
 }catch(error){console.error(error);}
+try{const r=await fetch('data/site.json',{cache:'no-cache'});const f=r.ok?(await r.json()||{}).fun:null;if(f&&typeof f==='object')FUN=f;}catch(error){console.error(error);}
+const CARD_BACK=safeURL(FUN.cardBack),SAVER_IMG=safeURL(FUN.saverImage);
+const ALIEN_LINES=(Array.isArray(FUN.alienLines)?FUN.alienLines:[]).map(x=>String(x||'').trim()).filter(Boolean);
+const BACK=CARD_BACK?`<div class="gcard-back art"><img src="${esc(CARD_BACK)}" alt=""></div>`:`<div class="gcard-back"><span>${UFO}</span><b>?</b></div>`;
 const owned=c=>MintDex.read()[MintDex.key(c.work.id,c.src)]||0;
 
 document.body.insertAdjacentHTML('beforeend',`
@@ -48,8 +52,8 @@ document.body.insertAdjacentHTML('beforeend',`
 document.querySelectorAll('.fun-win').forEach(d=>{d.addEventListener('click',e=>{if(e.target===d||e.target.closest('[data-close]'))d.close();});});
 window.addEventListener('hashchange',()=>document.querySelectorAll('.fun-win[open]').forEach(d=>d.close()));
 
-const cardHTML=(c,cls='')=>`<div class="gcard t${c.tier} ${cls}"><div class="gcard-in"><div class="gcard-back"><span>${UFO}</span><b>?</b></div><div class="gcard-front"><img src="${esc(c.src)}" alt="${esc(c.work.name)}"><span class="gcard-tier">${STARS(c.tier)}</span><span class="gcard-plate"><small>No.${esc(c.work.number)}</small><b>${esc(c.work.name)}</b></span></div></div></div>`;
-function renderLeft(){if(!$('gacha-left'))return;const n=left(load());$('gacha-left').textContent=`남은 뽑기 ${n}회`;$('gacha-pull').disabled=busy||n<1||!CARDS.length;$('gacha-count').textContent=`${CARDS.filter(owned).length}/${CARDS.length}`;}
+const cardHTML=(c,cls='')=>`<div class="gcard t${c.tier} ${cls}"><div class="gcard-in">${BACK}<div class="gcard-front"><img src="${esc(c.src)}" alt="${esc(c.work.name)}"><span class="gcard-tier">${STARS(c.tier)}</span><span class="gcard-plate"><small>No.${esc(c.work.number)}</small><b>${esc(c.work.name)}</b></span></div></div></div>`;
+function renderLeft(){if(!$('gacha-left'))return;const n=left(load());$('gacha-left').textContent=`남은 뽑기 ${n}회`;$('gacha-pull').disabled=busy||n<1||!CARDS.length;$('gacha-count').textContent=`${CARDS.filter(owned).length}/${CARDS.length}`;if($('draw-progress'))$('draw-progress').textContent=`모은 카드 ${CARDS.filter(owned).length}/${CARDS.length} · 오늘 남은 뽑기 ${n}회`;}
 let busy=false,last=null;
 function pick(){const tiers=[1,2,3].filter(t=>CARDS.some(c=>c.tier===t));let roll=Math.random()*tiers.reduce((n,t)=>n+ODDS[t],0);const tier=tiers.find(t=>(roll-=ODDS[t])<0)||tiers[0];const pool=CARDS.filter(c=>c.tier===tier);return pool[Math.floor(Math.random()*pool.length)];}
 const wait=ms=>new Promise(r=>setTimeout(r,calm?0:ms));
@@ -70,19 +74,19 @@ async function pull(){
 function zoom(c){$('gzoom-img').src=c.src;$('gzoom-img').alt=c.work.name;$('gzoom-title').textContent=`${c.work.name} — No.${c.work.number}`;$('gzoom-tier').textContent=STARS(c.tier);$('gzoom-go').href='#work/'+c.work.id;$('gzoom').showModal();}
 function renderBook(){
  const works=[...new Set(CARDS.map(c=>c.work))];
- $('gacha-book').innerHTML=`<p class="gacha-progress">모은 카드 <b>${CARDS.filter(owned).length}</b> / ${CARDS.length}</p>`+works.map(w=>{const cards=CARDS.filter(c=>c.work===w);return `<section class="gbook-work"><h3><small>No.${esc(w.number)}</small> ${esc(w.name)} <span>${cards.filter(owned).length}/${cards.length}</span></h3><div class="gbook-grid">${cards.map(c=>{const n=owned(c);const i=CARDS.indexOf(c);return n?`<button type="button" class="gbook-card" data-card="${i}" aria-label="${esc(w.name)} ${STARS(c.tier)} 카드 크게 보기">${cardHTML(c,'flipped mini')}${n>1?`<span class="gbook-n">×${n}</span>`:''}</button>`:`<div class="gbook-card none" aria-label="아직 없는 ${STARS(c.tier)} 카드">${`<div class="gcard t${c.tier} mini"><div class="gcard-in"><div class="gcard-back"><span>${UFO}</span><b>?</b></div></div></div>`}<span class="gbook-n">${STARS(c.tier)}</span></div>`;}).join('')}</div></section>`;}).join('');
+ $('gacha-book').innerHTML=`<p class="gacha-progress">모은 카드 <b>${CARDS.filter(owned).length}</b> / ${CARDS.length}</p>`+works.map(w=>{const cards=CARDS.filter(c=>c.work===w);return `<section class="gbook-work"><h3><small>No.${esc(w.number)}</small> ${esc(w.name)} <span>${cards.filter(owned).length}/${cards.length}</span></h3><div class="gbook-grid">${cards.map(c=>{const n=owned(c);const i=CARDS.indexOf(c);return n?`<button type="button" class="gbook-card" data-card="${i}" aria-label="${esc(w.name)} ${STARS(c.tier)} 카드 크게 보기">${cardHTML(c,'flipped mini')}${n>1?`<span class="gbook-n">×${n}</span>`:''}</button>`:`<div class="gbook-card none" aria-label="아직 없는 ${STARS(c.tier)} 카드"><div class="gcard t${c.tier} mini"><div class="gcard-in">${BACK}</div></div><span class="gbook-n">${STARS(c.tier)}</span></div>`;}).join('')}</div></section>`;}).join('');
 }
 function tab(name){for(const n of ['draw','book']){$('gtab-'+n).setAttribute('aria-selected',String(n===name));$('gacha-'+n).hidden=n!==name;}if(name==='book')renderBook();}
 function openGacha(){if(!CARDS.length)return;const tiers=[1,2,3].filter(t=>CARDS.some(c=>c.tier===t));const sum=tiers.reduce((n,t)=>n+ODDS[t],0);
  $('gacha-odds').textContent='확률  '+tiers.map(t=>`${STARS(t)} ${Math.round(ODDS[t]/sum*100)}%`).join(' · ')+`  ·  하루 ${DAILY}회`;
- if(!$('gacha-stage').firstElementChild){$('gacha-stage').innerHTML=`<div class="gcard t1"><div class="gcard-in"><div class="gcard-back"><span>${UFO}</span><b>?</b></div></div></div>`;$('gacha-msg').textContent='카드를 뽑아 캐릭터를 수집해 보세요.';}
+ if(!$('gacha-stage').firstElementChild){$('gacha-stage').innerHTML=`<div class="gcard t1"><div class="gcard-in">${BACK}</div></div>`;$('gacha-msg').textContent='카드를 뽑아 캐릭터를 수집해 보세요.';}
  tab('draw');renderLeft();if(!$('gacha').open)$('gacha').showModal();}
 $('gacha-pull').addEventListener('click',pull);
 $('gtab-draw').addEventListener('click',()=>tab('draw'));$('gtab-book').addEventListener('click',()=>tab('book'));
 $('gacha-zoom-open').addEventListener('click',()=>last&&zoom(last));
 $('gacha-book').addEventListener('click',e=>{const b=e.target.closest('[data-card]');if(b)zoom(CARDS[Number(b.dataset.card)]);});
 window.addEventListener('mint:gacha',openGacha);
-if(CARDS.length)document.querySelectorAll('[data-open-gacha]').forEach(b=>{b.hidden=false;b.addEventListener('click',openGacha);});
+if(CARDS.length){document.querySelectorAll('[data-open-gacha]').forEach(b=>{b.hidden=false;b.addEventListener('click',openGacha);});document.querySelectorAll('[data-gacha-show]').forEach(el=>{el.hidden=false;});if(CARD_BACK)document.querySelectorAll('.draw-fan i').forEach(i=>{i.style.backgroundImage=`url("${encodeURI(CARD_BACK)}")`;});renderLeft();}
 
 // ---- Ask window: the ask page inside a window on this site ----------------------------------
 // Plain clicks open the window; ctrl/shift/middle clicks still open a new tab as before.
@@ -93,18 +97,24 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="https:/
 const closeBox=document.querySelector('.titlebar .window-controls span:last-child');
 if(closeBox){closeBox.classList.add('egg-close');closeBox.addEventListener('click',()=>{
  const el=document.createElement('div');el.className='mintscreen';el.setAttribute('role','alertdialog');el.setAttribute('aria-label','민트스크린');el.tabIndex=-1;
- el.innerHTML=`<div><p class="mintscreen-face">👽</p><h2>MINT_CHOCO_OVERFLOW</h2><p>민트초코 농도가 허용치를 초과했습니다.<br>이 창은 닫히지 않습니다. 지구인의 기기는 안전합니다.</p><p class="mintscreen-code">STOP: 0xM1NT_CH0C0 (extra mint, extra chips)</p><p class="mintscreen-tip">아무 곳이나 누르면 돌아갑니다 _</p></div>`;
+ const LINES=[['h2','','MINT_CHOCO_OVERFLOW'],['p','','민트초코 농도가 허용치를 초과했습니다.\n이 창은 닫히지 않습니다. 지구인의 기기는 안전합니다.'],['p','mintscreen-code','STOP: 0xM1NT_CH0C0 (extra mint, extra chips)\n*** MEMORY DUMP: mint 100% / choco 100% / toothpaste 0%']];
+ el.innerHTML=`<div><p class="mintscreen-face">👽</p>${LINES.map(([tag,cls,text])=>`<${tag} class="${cls}" aria-label="${esc(text)}"></${tag}>`).join('')}<p class="mintscreen-tip" hidden>아무 곳이나 누르면 돌아갑니다 _</p></div>`;
  document.body.appendChild(el);el.focus();
- const end=()=>{el.remove();document.removeEventListener('keydown',end);foundEgg('mintscreen');};
+ // The text is typed out line by line, then the screen glitches once before the hint appears.
+ let alive=true;(async()=>{const slots=[...el.querySelectorAll('[aria-label]')];
+  for(const [i,[, ,text]] of LINES.entries()){if(calm){slots[i].textContent=text;continue;}for(const ch of text){if(!alive)return;slots[i].textContent+=ch;await new Promise(r=>setTimeout(r,ch==='\n'?160:16));}await new Promise(r=>setTimeout(r,180));}
+  if(!alive)return;if(!calm){el.classList.add('glitch');await new Promise(r=>setTimeout(r,650));el.classList.remove('glitch');}
+  el.querySelector('.mintscreen-tip').hidden=false;})();
+ const end=()=>{alive=false;el.remove();document.removeEventListener('keydown',end);foundEgg('mintscreen');};
  // Armed a moment later so the tap that opened it does not close it again.
  setTimeout(()=>{el.addEventListener('click',end);document.addEventListener('keydown',end);},250);
 });}
 
 // ---- Easter egg 2: poke the alien five times ---------------------------------------------------
 const hero=document.querySelector('.hero-visual');
-if(hero){let pokes=0,line=-1,timer;hero.addEventListener('click',()=>{if(++pokes<5)return;
+if(hero&&ALIEN_LINES.length){let pokes=0,line=-1,timer;hero.addEventListener('click',()=>{if(++pokes<5)return;
  let b=hero.querySelector('.alien-says');if(!b){b=document.createElement('p');b.className='alien-says';b.setAttribute('role','status');hero.appendChild(b);}
- line=(line+1+Math.floor(Math.random()*(ALIEN_LINES.length-1)))%ALIEN_LINES.length;b.textContent=ALIEN_LINES[line];b.classList.add('on');
+ line=ALIEN_LINES.length>1?(line+1+Math.floor(Math.random()*(ALIEN_LINES.length-1)))%ALIEN_LINES.length:0;b.textContent=ALIEN_LINES[line];b.classList.add('on');
  clearTimeout(timer);timer=setTimeout(()=>b.classList.remove('on'),4000);foundEgg('alien');});}
 
 // ---- Easter egg 3: screensaver, a mint choco cone bouncing around --------------------------------
@@ -113,9 +123,10 @@ if(!calm){let idle,saver=null;
  const COLORS=['#00efb2','#ff3688','#83e30e','#6fd3ff','#f1f2ed'];
  const stop=()=>{if(!saver)return;cancelAnimationFrame(saver.raf);saver.el.remove();saver=null;foundEgg('saver');};
  const start=()=>{if(saver||document.hidden||document.querySelector('dialog[open],.mintscreen'))return arm();
-  const el=document.createElement('div');el.className='saver';el.innerHTML=`<i>${CONE}</i><p>아무 키나 누르면 돌아갑니다</p>`;document.body.appendChild(el);
-  const cone=el.firstElementChild;let x=Math.random()*(innerWidth-64),y=Math.random()*(innerHeight-96),dx=2.2,dy=1.8,color=0;
-  saver={el,raf:0};const step=()=>{x+=dx;y+=dy;let hit=false;if(x<0||x>innerWidth-64){dx=-dx;x=Math.max(0,Math.min(x,innerWidth-64));hit=true;}if(y<0||y>innerHeight-96){dy=-dy;y=Math.max(0,Math.min(y,innerHeight-96));hit=true;}
+  const el=document.createElement('div');el.className='saver';el.innerHTML=`<i>${SAVER_IMG?`<img src="${esc(SAVER_IMG)}" alt="">`:CONE}</i><p>아무 키나 누르면 돌아갑니다</p>`;document.body.appendChild(el);
+  // Size is read each frame: an uploaded picture has no size until it has loaded.
+  const cone=el.firstElementChild;let W=64,H=96,x=Math.random()*(innerWidth-W),y=Math.random()*(innerHeight-H),dx=2.2,dy=1.8,color=0;
+  saver={el,raf:0};const step=()=>{W=cone.offsetWidth||64;H=cone.offsetHeight||96;x+=dx;y+=dy;let hit=false;if(x<0||x>innerWidth-W){dx=-dx;x=Math.max(0,Math.min(x,innerWidth-W));hit=true;}if(y<0||y>innerHeight-H){dy=-dy;y=Math.max(0,Math.min(y,innerHeight-H));hit=true;}
    if(hit){color=(color+1)%COLORS.length;cone.style.color=COLORS[color];}cone.style.transform=`translate(${x}px,${y}px)`;if(saver)saver.raf=requestAnimationFrame(step);};
   cone.style.color=COLORS[0];step();};
  const arm=()=>{clearTimeout(idle);idle=setTimeout(start,IDLE_MS);};

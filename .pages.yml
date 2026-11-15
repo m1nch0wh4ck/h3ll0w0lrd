@@ -363,3 +363,23 @@ content:
       switcher: false
       media: false
     description: 오른쪽 안내 상자입니다. 엔터로 문단을 나누고, 강조할 부분은 글자를 선택한 뒤 굵게(B) 버튼을 누르세요.
+- name: fun
+  label: 카드 뽑기 · 꾸미기
+  description: 카드 뽑기의 카드 뒷면, 화면보호기 그림, 메인 그림을 여러 번 눌렀을 때 나오는 대사입니다. 비워 두면 기본 디자인이 쓰입니다.
+  type: file
+  path: _data/fun.json
+  format: json
+  fields:
+  - name: cardBack
+    label: 카드 뒷면 이미지
+    type: image
+    description: 뽑기 전 카드와 카드첩의 아직 없는 카드에 쓰입니다. 세로 5:8 비율(예 500×800)로 만들면 잘리지 않습니다.
+  - name: saverImage
+    label: 화면보호기 이미지
+    type: image
+    description: 화면을 튕겨 다니는 그림입니다. 배경이 투명한 PNG나 GIF를 권합니다. 높이 96px로 표시되니 200px 안팎이면 충분합니다.
+  - name: alienLines
+    label: 외계인 대사
+    type: string
+    list: true
+    description: 메인 그림을 5번 누르면 이 중 하나가 나옵니다.
