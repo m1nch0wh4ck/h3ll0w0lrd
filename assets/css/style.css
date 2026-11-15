@@ -3,7 +3,7 @@
 :root{
   --mint:#00efb2;--ink:#141615;--paper:#f1f2ed;--silver:#b8bfba;--face:#c6ccc7;
   --muted:#535c56;--text2:#3c473e;--line:#a2ada4;--dark-line:#424a44;
-  --melloy:#ff3688;--lumo:#83e30e;
+  --mint-pale:#e6f1ec;--melloy:#ff3688;--lumo:#83e30e;
   --gut:32px;
   --px:'Galmuri11','Malgun Gothic',sans-serif;
   --sans:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
@@ -279,6 +279,17 @@ img{display:block;max-width:100%}
 /* An opened persona takes the whole row: picture and name on the left, details on the right */
 .persona[open]{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);column-gap:32px;align-items:start}
 .persona>dl{margin:0;display:flex;flex-direction:column}
+/* Pale mint box that sets unfolded text (persona details, intros) apart from the page */
+.note-box{margin:0;padding:14px 20px;background:var(--mint-pale);border:1px solid var(--line)}
+/* 시작 상황: intros that fold */
+.fold-list{display:flex;flex-direction:column;gap:8px}
+.fold>summary{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;list-style:none;cursor:pointer;background:var(--face);box-shadow:var(--raised)}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary b{font:700 18px/1.4 var(--px);white-space:nowrap}
+.fold>summary span{min-width:0;overflow-wrap:anywhere}
+.fold>summary::after{content:"+";margin-left:auto;font:700 18px/1 var(--px)}
+.fold[open]>summary::after{content:"−"}
+.fold>p{max-width:none;border-top:0;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
 .persona-row{display:grid;grid-template-columns:104px minmax(0,1fr);column-gap:20px;padding:8px 0;border-top:1px solid var(--line)}
 .persona-row:first-child{border-top:0;padding-top:0}
 .persona-row.wide{grid-template-columns:1fr}

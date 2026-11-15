@@ -143,9 +143,20 @@ content:
       type: text
       default: "나이: \n직업: \n키: \n생일: \nMBTI: \n관계: \n좋아하는 것: \n싫어하는 것: "
       description: "기본 항목이 미리 들어 있습니다. 콜론 뒤에 내용을 적으세요. 내용을 비워 둔 항목은 홈페이지에 나오지 않습니다. 항목을 지우거나 '항목: 내용' 줄을 더 추가해도 되고, 콜론이 없는 줄은 한 줄 글로 나옵니다."
-  - name: start
-    label: 시작 상황
-    type: text
+  - name: starts
+    label: 시작 상황 (인트로)
+    type: object
+    list: true
+    description: 인트로를 하나씩 추가하세요. 작품 상세에 '인트로 1', '인트로 2'처럼 번호가 붙어 나뉘어 나오고, 누르면 펼쳐집니다.
+    fields:
+    - name: title
+      label: 제목 (선택)
+      type: string
+      description: "비워 두면 '인트로 1'처럼 번호만 나옵니다."
+    - name: text
+      label: 내용
+      type: text
+      required: true
   - name: notes
     label: 플레이 안내
     type: text

@@ -38,6 +38,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # CMS는 이미지를 열려 있는 폴더(보통 최상위)에 올리므로, 저장 후 작품 폴더로 옮기고 경로를 고칩니다.
+      - name: 이미지를 작품 폴더로 정리
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
+        run: python3 .github/scripts/sort_images.py
+
       - name: 상태 변화 비교
         env:
           BEFORE: ${{ github.event.before || inputs.before }}
@@ -49,11 +54,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git add _data/logs _data/versions.json
+          git add -A _data/logs _data/versions.json _data/works assets/images
           if git diff --cached --quiet; then echo "새 기록 없음"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git commit -q -m "LOG·버전 자동 기록 (작품 변경)"
+          git commit -q -m "자동 정리 (LOG·버전·이미지 폴더)"
           pushed=
           for i in 1 2 3 4; do
             if git pull -q --rebase origin main && git push -q origin HEAD:main; then pushed=1; break; fi
