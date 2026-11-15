@@ -1,3 +1,5 @@
+// Small window buttons (– □ ×) drawn in the title bar of card and memo windows.
+const WINDOW_CONTROLS='<svg aria-hidden="true" width="52" height="16" viewBox="0 0 52 16"><path fill="#c6ccc7" d="M0 0h16v16H0zM18 0h16v16H18zM36 0h16v16H36z"/><path fill="none" stroke="#141615" stroke-width="2" d="M4 11h7M22 5h8M22 5v7h8V5M40 4l8 8M48 4l-8 8"/></svg>';
 // COMING NEXT / LOG / INFO are edited in Pages CMS (_data/upcoming, _data/logs, _data/info.json) and exported by data/site.json.
 // Loaded separately so a problem here never hides the work collection.
 (async function(){
@@ -26,9 +28,10 @@
   box.hidden=!list.length;
  }
  function renderLogs(data){
+  // Each record is a memo (notepad) window: title bar, a bar with tag and date, white text area.
   // Newest date first; records without a date keep a fixed order after dated ones.
   const list=items(data).map(x=>({...x,date:DATE.test(str(x.date))?str(x.date):''})).sort((a,b)=>(a.date&&b.date?b.date.localeCompare(a.date):!a.date-!b.date)||byId(a,b));
-  $('log-list').innerHTML=list.map(x=>{const tag=str(x.tag)||str(x.category);const d=x.date.match(DATE);return `<article class="note">${tag?`<span class="note-tag">${esc(tag)}</span>`:''}${d?`<time class="note-date" datetime="${x.date}">${d[1]}.${d[2]}.${d[3]}</time>`:''}<h3>${esc(str(x.title))}</h3>${paragraphs(x.body)}</article>`;}).join('');
+  $('log-list').innerHTML=list.map(x=>{const tag=str(x.tag)||str(x.category);const d=x.date.match(DATE);return `<article class="note"><div class="tbar" aria-hidden="true"><span>${d?`log_${d[1]}${d[2]}${d[3]}`:'memo'}.txt — 메모장</span><span class="wctl">${WINDOW_CONTROLS}</span></div>${tag||d?`<div class="note-menu">${tag?`<span class="note-tag">${esc(tag)}</span>`:''}${d?`<time class="note-date" datetime="${x.date}">${d[1]}.${d[2]}.${d[3]}</time>`:''}</div>`:''}<div class="note-body"><h3>${esc(str(x.title))}</h3>${paragraphs(x.body)}</div></article>`;}).join('');
   $('log-empty').hidden=list.length!==0;
   // Status bar (bottom of the window): date of the newest dated record.
   const latest=list.find(x=>x.date);if(latest){const d=latest.date.match(DATE);$('status-log').textContent=`최근 기록 ${d[1]}.${d[2]}.${d[3]}`;}
@@ -110,7 +113,6 @@ const platformTag=name=>name?`<b class="pfm ${({'멜로이':'pfm-m','루모':'pf
 const statusChip=s=>s?`<span class="st" data-status="${esc(s)}">${esc(s)}</span>`:'';
 // Card lines: entries with the same platform and status share one line (세이프 / 언세이프).
 function platformLines(w){const out=[];w.platforms.forEach(p=>{let g=out.find(x=>x.name===p.name&&x.status===p.status);if(!g){g={name:p.name,status:p.status,safety:[]};out.push(g);}p.safety.forEach(s=>{if(!g.safety.includes(s))g.safety.push(s);});});return out;}
-const WINDOW_CONTROLS='<svg aria-hidden="true" width="52" height="16" viewBox="0 0 52 16"><path fill="#c6ccc7" d="M0 0h16v16H0zM18 0h16v16H18zM36 0h16v16H36z"/><path fill="none" stroke="#141615" stroke-width="2" d="M4 11h7M22 5h8M22 5v7h8V5M40 4l8 8M48 4l-8 8"/></svg>';
 const TRANSPORT='<svg aria-hidden="true" width="94" height="16" viewBox="0 0 94 16"><path fill="#141615" d="M2 3l9 5-9 5zM20 3h3v10h-3zM26 3h3v10h-3zM38 3h10v10H38zM64 3h2v10h-2zM75 3v10l-8-5zM82 3l8 5-8 5zM91 3h2v10h-2z"/><path stroke="#747d76" d="M56.5 1v14"/></svg>';
 // Collection card: an old media-player window. The top part (title bar to play buttons) is one link to the work.
 function renderCards(){const found=WORKS.filter(matchesWork);$('cards').innerHTML=found.map(w=>{const lines=platformLines(w);const summary=w.tagline||w.description;const keys=w.keywords.slice(0,3);return `<article class="win"><a class="card" href="#work/${esc(w.id)}" data-id="${esc(w.id)}" aria-label="${esc(w.name)} 작품 소개 열기"><span class="tbar"><span>${esc(w.id)}.avi</span><span class="wctl">${WINDOW_CONTROLS}</span></span><span class="scr${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="" loading="lazy">`:`<span class="typo-cover">${(w.coverLines||[w.name[0],w.name.slice(1)]).map(esc).join('<br>')}</span>`}</span><span class="plate"><span class="no">No.${esc(w.number)}</span><span class="nm" role="heading" aria-level="3">${esc(w.name)}</span></span><span class="seek"><i></i></span><span class="tp">${TRANSPORT}</span></a><div class="info">${lines.length?`<div class="prow">${lines.map(p=>`<div class="pl">${platformTag(p.name)}<span>${safeText(p.safety)}</span>${statusChip(p.status)}</div>`).join('')}</div>`:''}${summary?`<div class="row"><span class="lab">소개</span><p class="tx">${esc(summary)}</p></div>`:''}${keys.length?`<div class="row"><span class="lab">태그</span><p class="tg">${keys.map(k=>'#'+esc(k)).join(' ')}</p></div>`:''}</div></article>`;}).join('');$('empty').hidden=found.length!==0;$('result-count').textContent=`${WORKS.length}편 중 ${found.length}편`;}
@@ -168,9 +170,8 @@ async function copyLink(){const state=$('share-state');if(location.protocol==='f
 $('cards').addEventListener('click',e=>{const a=e.target.closest('a[data-id]');if(a)lastCard=a;});
 // Phones: the filter choices stay folded behind the 필터 button so the cards show first.
 $('filter-toggle').addEventListener('click',()=>{const open=$('filters').classList.toggle('open');$('filter-toggle').setAttribute('aria-expanded',String(open));});
-// Window status bar and the hero's fact line come from the work list.
+// Window status bar: number of works.
 $('status-works').textContent=`작품 ${WORKS.length}편`;
-{const live=[...new Set(WORKS.flatMap(w=>w.platforms.filter(p=>p.status==='공개 중').map(p=>p.name)).filter(Boolean))];if(WORKS.length){$('hero-fact').textContent=`캐릭터 챗봇 ${WORKS.length}편`+(live.length?` · ${live.join('·')}에서 공개 중`:'');$('hero-fact').hidden=false;}}
 $('search').addEventListener('input',renderCards);['platform','genre','cast','romance','safety','status'].forEach(id=>$(id).addEventListener('change',renderCards));$('reset-filters').addEventListener('click',()=>{$('search').value='';['platform','genre','cast','romance','safety','status'].forEach(id=>$(id).value='all');renderCards();});
 if('scrollRestoration' in history)history.scrollRestoration='manual';
 window.addEventListener('hashchange',syncRoute);renderCards();syncRoute();
