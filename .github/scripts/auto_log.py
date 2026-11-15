@@ -7,7 +7,7 @@ Only the platform list is compared (name + safety identify a platform, status is
 Text, link and image edits produce nothing. A work only gets a "새 작품" entry once one of its
 platforms is 공개 중, so registering a work before launch stays quiet.
 
-It also counts platform versions in _data/versions.json ({work id: {"플랫폼|세이프티": n}}):
+It also counts platform versions in _data/versions.json ({work id: {"플랫폼|세이프": n}}):
 a platform entry gets 1 the first time it is 공개 중, and +1 each time its link, status or
 버전별 안내 changes while it is 공개 중. Nothing is typed by hand; the homepage shows "v n".
 """
@@ -24,6 +24,11 @@ VERSIONS = '_data/versions.json'
 PUBLIC = '공개 중'
 NAMESPACE = uuid.UUID('6f1c1d3e-8f0a-4c51-9d55-3a9b8f0e2c71')
 KST = datetime.timezone(datetime.timedelta(hours=9))
+
+
+def short(safety):
+    """Older records say 세이프티 / 언세이프티; the CMS now saves 세이프 / 언세이프. Treat them as the same."""
+    return [{'세이프티': '세이프', '언세이프티': '언세이프'}.get(s, s) for s in safety or []]
 
 
 def git(*args):
@@ -48,17 +53,17 @@ def platforms(work):
     out = []
     for p in work.get('platforms') or []:
         if isinstance(p, dict) and p.get('name'):
-            safety = '/'.join(p.get('safety') or [])
+            safety = '/'.join(short(p.get('safety')))
             out.append(((p['name'], safety), p.get('status') or ''))
     return out
 
 
 def platform_details(work):
-    """{"플랫폼|세이프티": (link, status, 버전별 안내)} for the first entry with each key."""
+    """{"플랫폼|세이프": (link, status, 버전별 안내)} for the first entry with each key."""
     out = {}
     for p in (work or {}).get('platforms') or []:
         if isinstance(p, dict) and p.get('name'):
-            key = p['name'] + '|' + '/'.join(p.get('safety') or [])
+            key = p['name'] + '|' + '/'.join(short(p.get('safety')))
             out.setdefault(key, (p.get('url') or '', p.get('status') or '', p.get('releaseNote') or ''))
     return out
 
@@ -79,13 +84,12 @@ def count_versions(before, after, versions):
             else:
                 continue
             versions.setdefault(work_id, {})[key] = new
-            changes.append(f'{work["name"]} · {key.replace("|", " ").replace("세이프티", "세이프")} → v{new}')
+            changes.append(f'{work["name"]} · {key.replace("|", " ")} → v{new}')
     return changes
 
 
 def label(key):
-    # The homepage shows the short names (세이프 / 언세이프); the stored values keep the long ones.
-    return ' '.join(part for part in key if part).replace('세이프티', '세이프')
+    return ' '.join(part for part in key if part)
 
 
 def is_public(work):

@@ -14,7 +14,7 @@ const WINDOW_CONTROLS='<svg aria-hidden="true" width="52" height="16" viewBox="0
  const paragraphs=t=>str(t).replace(/\r\n?/g,'\n').split(/\n[ \t]*\n+/).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${lines(s)}</p>`).join('');
  const DATE=/^(\d{4})-(\d{2})-(\d{2})$/;
  const byId=(a,b)=>str(a.id).localeCompare(str(b.id));
- // The CMS keeps 세이프티 / 언세이프티 as stored values; the screen shows the short names.
+ // Older records were saved as 세이프티 / 언세이프티; everything is read as the short names the CMS uses now.
  const safeName=s=>({'세이프티':'세이프','언세이프티':'언세이프'})[s]||s;
  function renderUpcoming(data,allWorks){
   const num=v=>v===''||v==null||!isFinite(v)?Infinity:Number(v);
@@ -86,6 +86,7 @@ try {
  // Platform versions are counted by the auto-log workflow (_data/versions.json); the page still works without them.
  let VERSIONS={};try{const r=await fetch('data/versions.json',{cache:'no-cache'});if(r.ok)VERSIONS=await r.json()||{};}catch{}
  const list=v=>Array.isArray(v)?v:[];
+ const safeName=s=>({'세이프티':'세이프','언세이프티':'언세이프'})[s]||s;
  // 작품 소개문 HTML: the HTML pasted from the platform. Text without any tag is shown as plain text.
  const isHTML=s=>/<[a-z][^>]*>/i.test(s);
  const plainText=s=>{if(!isHTML(s))return s;const d=new DOMParser().parseFromString(s,'text/html');d.querySelectorAll('style,script').forEach(el=>el.remove());return d.body.textContent.replace(/\s+/g,' ').trim();};
@@ -95,7 +96,7 @@ try {
   personas:list(w.personas).filter(p=>p&&typeof p==='object'&&p.name).map(p=>({name:String(p.name),description:String(p.description||''),image:safeURL(p.image)})),
   image:safeURL(w.image),genres:list(w.genres),romance:list(w.romance),keywords:list(w.keywords),
   gallery:list(w.gallery).map(safeURL).filter(Boolean),
-  platforms:list(w.platforms).map(p=>({...p,url:safeURL(p.url),safety:list(p.safety)}))
+  platforms:list(w.platforms).map(p=>({...p,url:safeURL(p.url),safety:list(p.safety).map(safeName)}))
  })).sort((a,b)=>a.number.localeCompare(b.number,undefined,{numeric:true}));
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -110,8 +111,6 @@ function matchesWork(w){
  if(['platform','status','safety'].every(id=>$(id).value==='all'))return true;
  return w.platforms.some(p=>($('platform').value==='all'||p.name===$('platform').value)&&($('status').value==='all'||p.status===$('status').value)&&($('safety').value==='all'||p.safety.includes($('safety').value)));
 }
-// The CMS keeps 세이프티 / 언세이프티 as stored values; the screen shows the short names.
-const safeName=s=>({'세이프티':'세이프','언세이프티':'언세이프'})[s]||s;
 const safeText=list=>list.map(s=>esc(safeName(s))).join(' / ');
 // Platform tag: a small UFO in the platform's colour box (멜로이 pink, 루모 green, anything else grey).
 const UFO='<svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><g transform="rotate(-14 12 12)"><path d="M6.5 9a5.5 5.5 0 0 1 11 0c-1.7-.5-3.6-.7-5.5-.7s-3.8.2-5.5.7z"/><path fill-rule="evenodd" d="M12 9.6c6.1 0 11 2 11 4.4s-4.9 4.4-11 4.4S1 16.4 1 14s4.9-4.4 11-4.4zM4.5 14a1 1 0 1 0 2 0a1 1 0 1 0-2 0zM11 16a1 1 0 1 0 2 0a1 1 0 1 0-2 0zM17.5 14a1 1 0 1 0 2 0a1 1 0 1 0-2 0z"/></g></svg>';
