@@ -87,6 +87,9 @@ try {
  let VERSIONS={};try{const r=await fetch('data/versions.json',{cache:'no-cache'});if(r.ok)VERSIONS=await r.json()||{};}catch{}
  const list=v=>Array.isArray(v)?v:[];
  const safeName=s=>({'세이프티':'세이프','언세이프티':'언세이프'})[s]||s;
+ // 추천 페르소나: 나이·성별 come from their own fields; when those are empty, "[나이] 29세" / "[성별] 여성" lines
+ // in the description (the form used on the platform) are read instead and left out of the unfolded text.
+ const persona=p=>{let text=String(p.description||'').replace(/\r\n?/g,'\n');const take=(label,own)=>{own=String(own||'').trim();if(own)return own;const m=text.match(new RegExp('^\\s*\\['+label+'\\]\\s*(.+)$','m'));if(!m)return '';text=text.replace(m[0],'');return m[1].trim();};const gender=take('성별',p.gender),age=take('나이',p.age);return {name:String(p.name),age,gender,description:text.split('\n').map(x=>x.trim()).filter(Boolean).join('\n'),image:safeURL(p.image)};};
  // 작품 소개문 HTML: the HTML pasted from the platform. Text without any tag is shown as plain text.
  const isHTML=s=>/<[a-z][^>]*>/i.test(s);
  const plainText=s=>{if(!isHTML(s))return s;const d=new DOMParser().parseFromString(s,'text/html');d.querySelectorAll('style,script').forEach(el=>el.remove());return d.body.textContent.replace(/\s+/g,' ').trim();};
@@ -94,7 +97,7 @@ try {
  const WORKS=Object.values(records||{}).filter(w=>w&&/^[a-z0-9-]+$/.test(w.id)&&w.name).map(w=>({
   ...w, name:String(w.name),number:String(w.number||''),description:String(w.description||''),descText:plainText(String(w.description||'')),
   profiles:list(w.profiles).filter(p=>p&&typeof p==='object'&&(p.name||p.text||p.image)).map(p=>({name:String(p.name||''),text:String(p.text||''),image:safeURL(p.image)})),
-  personas:list(w.personas).filter(p=>p&&typeof p==='object'&&p.name).map(p=>({name:String(p.name),description:String(p.description||''),image:safeURL(p.image)})),
+  personas:list(w.personas).filter(p=>p&&typeof p==='object'&&p.name).map(persona),
   image:safeURL(w.image),genres:list(w.genres),romance:list(w.romance),keywords:list(w.keywords),
   gallery:list(w.gallery).map(safeURL).filter(Boolean),
   platforms:list(w.platforms).map(p=>({...p,url:safeURL(p.url),safety:list(p.safety).map(safeName)}))
@@ -158,14 +161,27 @@ function profileBlock(w){
  const tools=PAINT_TOOLS.map((d,i)=>`<span class="paint-tool${i===6?' on':''}"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">${d}</svg></span>`).join('');
  const palette=PAINT_COLORS.map(c=>`<i style="background:${c}"></i>`).join('');
  return `<section class="detail-block"><h3>캐릭터 프로필</h3>${w.profiles.map((p,i)=>{
-  const lines=p.text.replace(/\r\n?/g,'\n').split('\n').map(s=>s.trim()).filter(Boolean);
+  // Template items left without a value (a line that ends with its colon, like "생일:") are not shown.
+  const lines=p.text.replace(/\r\n?/g,'\n').split('\n').map(s=>s.trim()).filter(s=>s&&!/^[^:：]{1,20}[:：]$/.test(s));
   const rows=lines.map(s=>{const m=s.match(/^([^:：]{1,20})[:：]\s*(.+)$/);return m?`<div class="paint-row"><dt>${esc(m[1].trim())}</dt><dd>${esc(m[2])}</dd></div>`:`<div class="paint-row wide"><dd>${esc(s)}</dd></div>`;}).join('');
   const file=(p.name||w.name)+'.bmp';
   return `<div class="paint"><div class="tbar" aria-hidden="true"><span>${esc(file)} — 그림판</span><span class="wctl">${WINDOW_CONTROLS}</span></div><div class="paint-body"><div class="paint-tools" aria-hidden="true">${tools}</div><div class="paint-canvas"><div class="paint-sheet${p.image?'':' no-figure'}">${p.image?`<div class="paint-figure"><img src="${esc(p.image)}" alt="${esc(p.name||w.name)} 전신" loading="lazy"></div>`:''}<div class="paint-text">${p.name?`<h4>${esc(p.name)}</h4>`:''}${rows?`<dl>${rows}</dl>`:''}</div></div></div></div><div class="paint-palette" aria-hidden="true"><span class="paint-now"></span><span class="paint-colors">${palette}</span></div><div class="paint-status" aria-hidden="true"><span>${lines.length} line(s)</span><span>${i+1} / ${w.profiles.length}</span></div></div>`;}).join('')}</section>`;
 }
 function personaBlock(w){
  if(!w.personas.length)return '';
- return `<section class="detail-block"><h3>추천 페르소나</h3><div class="persona-grid">${w.personas.map(p=>`<article class="persona">${p.image?`<div class="persona-art"><img src="${esc(p.image)}" alt="" loading="lazy"></div>`:''}<h4>${esc(p.name)}</h4>${p.description?`<p>${esc(p.description)}</p>`:''}</article>`).join('')}</div></section>`;
+ return `<section class="detail-block"><h3>추천 페르소나</h3><div class="persona-grid">${w.personas.map(p=>{const head=`${p.image?`<span class="persona-art"><img src="${esc(p.image)}" alt="" loading="lazy"></span>`:''}<span class="persona-name" role="heading" aria-level="4">${esc(p.name)}</span>${p.age||p.gender?`<span class="persona-meta">${esc([p.age,p.gender].filter(Boolean).join(' · '))}</span>`:''}`;const body=p.description.split('\n').map(s=>{const m=s.match(/^\[([^\]]{1,20})\]\s*(.+)$/);return m?`<div class="persona-row"><dt>${esc(m[1])}</dt><dd>${esc(m[2])}</dd></div>`:`<div class="persona-row wide"><dd>${esc(s)}</dd></div>`;}).join('');return p.description?`<details class="persona"><summary>${head}</summary><dl>${body}</dl></details>`:`<div class="persona">${head}</div>`;}).join('')}</div></section>`;
+}
+// Detail page tabs: 작품 소개 (intro, personas, start, notes) and 캐릭터 (profile windows, gallery).
+// Tabs appear only when both sides have something to show.
+function detailTabs(story,character){
+ if(!character)return story;
+ if(!story)return character;
+ return `<div class="tabs" role="tablist" aria-label="작품 정보"><button type="button" class="tab" role="tab" id="tab-story" aria-controls="panel-story" aria-selected="true">작품 소개</button><button type="button" class="tab" role="tab" id="tab-character" aria-controls="panel-character" aria-selected="false" tabindex="-1">캐릭터 · 갤러리</button></div><div class="tab-panel" id="panel-story" role="tabpanel" aria-labelledby="tab-story">${story}</div><div class="tab-panel" id="panel-character" role="tabpanel" aria-labelledby="tab-character" hidden>${character}</div>`;
+}
+function bindTabs(){
+ const tabs=[...$('detail-content').querySelectorAll('.tab')];
+ const pick=t=>{tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',String(on));x.tabIndex=on?0:-1;$(x.getAttribute('aria-controls')).hidden=!on;});};
+ tabs.forEach((t,i)=>{t.addEventListener('click',()=>pick(t));t.addEventListener('keydown',e=>{if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;const next=tabs[(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length];pick(next);next.focus();});});
 }
 // Detail page play list: one big platform tag, then one indented line per entry (세이프 / 언세이프) with its 열기 button.
 function playSection(w){
@@ -173,7 +189,7 @@ function playSection(w){
  const groups=names.map(n=>`<div class="play-group">${platformTag(n)}${w.platforms.filter(p=>p.name===n).map(p=>`<div class="play-row"><span class="play-what">${p.safety.length?`<b>${safeText(p.safety)}</b>`:''}${statusChip(p.status)}${versionOf(w,p)?`<span class="ver">v${versionOf(w,p)}</span>`:''}${p.releaseNote?`<small>${esc(p.releaseNote)}</small>`:''}</span>${p.url?`<a class="btn btn-s" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc([p.name,...p.safety.map(safeName)].filter(Boolean).join(' '))} 열기 (새 창)">열기</a>`:''}</div>`).join('')}</div>`).join('');
  return `<section class="play" aria-labelledby="play-title"><h3 id="play-title">플레이</h3>${groups}${w.platforms.some(p=>p.url)?'':'<p class="play-none">작품 바로가기 링크를 준비하고 있습니다.</p>'}<button type="button" class="btn btn-s" id="copy-link">이 작품 링크 복사</button><p id="share-state" class="share-state" role="status"></p></section>`;
 }
-function showWork(w){document.title=`${w.name} · 민초파왹`;const meta=[...w.genres,w.type,...w.romance,...w.keywords].filter(Boolean);$('detail-content').innerHTML=`<a class="back" href="#collection"><svg aria-hidden="true" width="14" height="12" viewBox="0 0 14 12"><path d="M14 6H2M7 1L2 6l5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>수집첩으로 돌아가기</a><div class="detail-header"><div class="detail-cover${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="${esc(w.name)}">`:esc(w.name)}</div><div class="detail-main"><div class="detail-title"><span class="mono">COLLECTION / No.${esc(w.number)}</span><h2 id="detail-title">${esc(w.name)}</h2>${w.tagline?`<p class="detail-tagline">${esc(w.tagline)}</p>`:''}${meta.length?`<p class="detail-tags">${meta.map(esc).join(' · ')}</p>`:''}</div>${playSection(w)}</div></div>${introBlock(w)}${profileBlock(w)}${personaBlock(w)}${block('시작 상황',w.start)}${block('플레이 안내',w.notes)}${galleryViewer(w)}`;$('copy-link').addEventListener('click',copyLink);mountIntro(w);if(w.gallery.length)bindViewer(w);}
+function showWork(w){document.title=`${w.name} · 민초파왹`;const meta=[...w.genres,w.type,...w.romance,...w.keywords].filter(Boolean);$('detail-content').innerHTML=`<a class="back" href="#collection"><svg aria-hidden="true" width="14" height="12" viewBox="0 0 14 12"><path d="M14 6H2M7 1L2 6l5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>수집첩으로 돌아가기</a><div class="detail-header"><div class="detail-cover${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="${esc(w.name)}">`:esc(w.name)}</div><div class="detail-main"><div class="detail-title"><span class="mono">COLLECTION / No.${esc(w.number)}</span><h2 id="detail-title">${esc(w.name)}</h2>${w.tagline?`<p class="detail-tagline">${esc(w.tagline)}</p>`:''}${meta.length?`<p class="detail-tags">${meta.map(esc).join(' · ')}</p>`:''}</div>${playSection(w)}</div></div>${detailTabs(introBlock(w)+personaBlock(w)+block('시작 상황',w.start)+block('플레이 안내',w.notes),profileBlock(w)+galleryViewer(w))}`;bindTabs();$('copy-link').addEventListener('click',copyLink);mountIntro(w);if(w.gallery.length)bindViewer(w);}
 // Gallery: an old-style image viewer window (preview + thumbnail list); the preview opens the original in a dialog.
 const imgName=i=>'IMG_'+String(i+1).padStart(2,'0');
 function galleryViewer(w){if(!w.gallery.length)return '';return `<section class="detail-block"><h3>이미지 갤러리</h3><div class="viewer"><div class="viewer-bar"><span>gallery_viewer.exe — ${esc(w.name)}</span><span aria-hidden="true">_ □ ×</span></div><div class="viewer-body"><button type="button" class="viewer-preview" id="viewer-open" aria-label="원본 크게 보기"><img id="viewer-main" src="${esc(w.gallery[0])}" alt="${esc(w.name)} ${imgName(0)}"></button><ul class="viewer-thumbs" aria-label="${esc(w.name)} 이미지 목록">${w.gallery.map((src,i)=>`<li><button type="button" class="viewer-thumb" data-i="${i}" aria-pressed="${i===0}" aria-label="${imgName(i)} 미리보기"><span class="viewer-thumb-art"><img src="${esc(src)}" alt="" loading="lazy"></span><span>${imgName(i)}</span><small></small></button></li>`).join('')}</ul></div><div class="viewer-status"><span>${w.gallery.length} object(s)</span><span id="viewer-info">${imgName(0)}</span><span class="viewer-tip">미리보기를 누르면 원본 크게 보기</span></div></div></section>`;}

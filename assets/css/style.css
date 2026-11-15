@@ -228,6 +228,12 @@ img{display:block;max-width:100%}
 .detail-block h3{font:700 24px/1.4 var(--px)}
 .detail-block>p{max-width:680px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
 
+/* Detail tabs (old property-sheet tabs) */
+.tabs{display:flex;align-items:flex-end;gap:4px;padding:0 8px;border-bottom:2px solid var(--ink)}
+.tab{min-height:44px;margin-bottom:-2px;padding:0 18px;border:2px solid var(--ink);border-bottom:0;background:var(--face);box-shadow:inset 2px 2px #fff;font:700 18px/1 var(--px)}
+.tab[aria-selected="true"]{min-height:50px;background:var(--paper);box-shadow:none;border-bottom:2px solid var(--paper)}
+.tab-panel{display:flex;flex-direction:column;gap:48px;margin-top:-16px}
+.tab-panel>.detail-block:first-child{padding-top:0;border-top:0}
 /* 작품 소개: the platform's intro page, shown as made, across the full width of the page */
 .intro-frame{display:block;width:100%;height:320px;border:1px solid var(--ink);background:#fff}
 /* 캐릭터 프로필: an old paint-program window (tools and colours are decoration) */
@@ -259,12 +265,25 @@ img{display:block;max-width:100%}
 .paint-colors i{display:block;box-shadow:inset 1px 1px #677069,inset -1px -1px #edf3ec;border:1px solid var(--ink)}
 .paint-status{display:flex;justify-content:space-between;gap:12px;padding:2px 8px;box-shadow:inset 1px 1px #677069,inset -1px -1px #edf3ec;font:13px/1.5 var(--mono)}
 /* 추천 페르소나 */
-.persona-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:24px}
-.persona{min-width:0;display:flex;flex-direction:column;gap:8px}
-.persona-art{padding:6px;background:var(--ink)}
+.persona-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:24px;align-items:start}
+.persona{min-width:0}
+.persona>summary,div.persona{display:flex;flex-direction:column;gap:6px}
+.persona>summary{list-style:none;cursor:pointer}
+.persona>summary::-webkit-details-marker{display:none}
+.persona>summary::after{content:"자세히 보기 +";align-self:flex-start;min-height:32px;display:flex;align-items:center;font-size:14px;text-decoration:underline;text-underline-offset:4px}
+.persona[open]>summary::after{content:"접기 −"}
+.persona-art{display:block;padding:6px;background:var(--ink)}
 .persona-art img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 20%;border:3px solid var(--mint)}
-.persona h4{margin:0;font:700 18px/1.4 var(--px);overflow-wrap:anywhere}
-.persona p{line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
+.persona-name{font:700 18px/1.4 var(--px);overflow-wrap:anywhere}
+.persona-meta{font-size:14px;color:var(--text2)}
+/* An opened persona takes the whole row: picture and name on the left, details on the right */
+.persona[open]{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);column-gap:32px;align-items:start}
+.persona>dl{margin:0;display:flex;flex-direction:column}
+.persona-row{display:grid;grid-template-columns:104px minmax(0,1fr);column-gap:20px;padding:8px 0;border-top:1px solid var(--line)}
+.persona-row:first-child{border-top:0;padding-top:0}
+.persona-row.wide{grid-template-columns:1fr}
+.persona-row dt{font-weight:700}
+.persona-row dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
 
 /* Gallery viewer window + original-size dialog */
 .viewer{padding:6px;background:var(--silver);border:1px solid var(--ink);box-shadow:inset 2px 2px #edf3ec,inset -2px -2px #677069}
@@ -351,6 +370,12 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   .detail-cover{flex-basis:100%;max-width:300px;margin:0 auto}
   .detail-title h2{font-size:36px}
   .persona-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px}
+  .persona[open]{grid-template-columns:1fr;row-gap:12px}
+  .persona[open]>summary{max-width:170px}
+  .persona-row{grid-template-columns:84px minmax(0,1fr);column-gap:14px}
+  .tabs{padding:0}
+  .tab{flex:1;padding:0 8px;font-size:12px}
+  .tab-panel{gap:40px;margin-top:-12px}
   .paint-body{grid-template-columns:1fr}
   .paint-tools{grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:24px;gap:1px}
   .paint-tool svg{width:15px;height:15px}

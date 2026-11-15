@@ -106,7 +106,7 @@ content:
     label: 추천 페르소나
     type: object
     list: true
-    description: 멜로이에 등록한 추천 페르소나를 하나씩 추가하세요. 작품 상세에 이미지·이름·설명이 나란히 나옵니다.
+    description: 멜로이에 등록한 추천 페르소나를 하나씩 추가하세요. 작품 상세에는 이미지·이름·나이·성별만 보이고, 누르면 자세한 설명이 펼쳐집니다.
     fields:
     - name: image
       label: 페르소나 이미지
@@ -115,9 +115,17 @@ content:
       label: 이름
       type: string
       required: true
+    - name: age
+      label: 나이
+      type: string
+      description: '예: 29세, 20대 후반'
+    - name: gender
+      label: 성별
+      type: string
     - name: description
-      label: 설명
+      label: 자세한 설명 (눌렀을 때 펼쳐짐)
       type: text
+      description: 외모, 직업 등. 비워 두면 펼치기 없이 이름·나이·성별만 나옵니다.
   - name: profiles
     label: 캐릭터 프로필
     type: object
@@ -133,7 +141,8 @@ content:
     - name: text
       label: 프로필
       type: text
-      description: "한 줄에 하나씩 적으세요. '나이: 29'처럼 '항목: 내용' 형식이면 항목과 내용이 나란히 정렬되고, 콜론이 없는 줄은 한 줄 글로 나옵니다."
+      default: "나이: \n직업: \n키: \n생일: \nMBTI: \n관계: \n좋아하는 것: \n싫어하는 것: "
+      description: "기본 항목이 미리 들어 있습니다. 콜론 뒤에 내용을 적으세요. 내용을 비워 둔 항목은 홈페이지에 나오지 않습니다. 항목을 지우거나 '항목: 내용' 줄을 더 추가해도 되고, 콜론이 없는 줄은 한 줄 글로 나옵니다."
   - name: start
     label: 시작 상황
     type: text
