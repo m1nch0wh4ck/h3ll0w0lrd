@@ -410,10 +410,7 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .draw-banner h2{color:var(--mint);font:700 24px/1.4 var(--px)}
 .draw-banner p span{display:block;margin-top:2px;color:var(--silver);font:13px/1.5 var(--mono)}
 .draw-banner .btn-p{background:var(--mint);color:var(--ink)}
-.draw-fan{position:relative;flex:0 0 auto;width:96px;height:84px}
-.draw-fan i{position:absolute;left:28px;top:6px;width:44px;height:70px;border:3px solid var(--mint);background:repeating-linear-gradient(135deg,#141615 0 6px,#2b302d 6px 12px) center/cover;transform-origin:50% 100%}
-.draw-fan i:nth-child(1){transform:rotate(-18deg) translateX(-14px);border-color:var(--silver)}
-.draw-fan i:nth-child(3){transform:rotate(18deg) translateX(14px);border-color:#ff3688}
+.draw-art{flex:0 0 auto;display:block;height:112px;width:auto}
 /* Gallery images that open only after their card is pulled */
 .viewer-preview,.viewer-thumb-art{position:relative;overflow:hidden}
 .lock-mark{display:none;position:absolute;inset:0;place-items:center;color:var(--mint);font:700 64px/1 var(--px);text-shadow:3px 3px var(--ink)}
@@ -430,7 +427,16 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .fun-win .tab[aria-selected="true"]{min-height:44px}
 .gacha-panel{flex:1;min-height:0;overflow-y:auto;padding:16px;text-align:center}
 .gacha-panel[hidden]{display:none}
-.gcard-stage{display:grid;place-items:center;min-height:330px;perspective:900px}
+.gcard-stage{position:relative;display:grid;place-items:center;min-height:340px;margin-bottom:34px;perspective:900px;--step:20px}
+/* A pile of card backs fanned out to the left; the card in play sits on top, a little to the right. */
+.gdeck,.gslot{grid-area:1/1}
+.gslot{position:relative;z-index:1;transform:translateX(34px)}
+.gdeck{position:relative;transform:translateX(34px)}
+.gdeck .gcard{position:absolute;left:-100px;top:-160px;transform-origin:50% 100%;filter:brightness(.82)}
+.gdeck .gcard:nth-child(1){transform:translate(calc(var(--step)*-4),10px) rotate(-12deg)}
+.gdeck .gcard:nth-child(2){transform:translate(calc(var(--step)*-3),7px) rotate(-9deg)}
+.gdeck .gcard:nth-child(3){transform:translate(calc(var(--step)*-2),4px) rotate(-6deg)}
+.gdeck .gcard:nth-child(4){transform:translate(calc(var(--step)*-1),2px) rotate(-3deg);filter:none}
 .gacha-msg{min-height:3em;margin:12px 0;font-size:16px}
 .gacha-msg b{color:#087052;letter-spacing:1px}
 .gacha-msg small{color:var(--muted);font-size:13px}
@@ -467,8 +473,8 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .gcard-front.framed.light .gcard-plate{color:var(--paper)}
 .gcard.mini .gcard-front.framed .gcard-plate{padding:0 8%}
 .gcard.t3 .gcard-front::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff8c 45%,#00efb266 52%,transparent 65%);background-size:260% 100%;animation:gshine 2.6s linear infinite;pointer-events:none}
-.gcard.shake{animation:gshake .7s ease-in-out}
-@keyframes gshake{0%,100%{transform:rotate(0)}15%{transform:rotate(-5deg)}30%{transform:rotate(5deg)}45%{transform:rotate(-7deg) scale(1.03)}60%{transform:rotate(7deg) scale(1.03)}80%{transform:rotate(-3deg)}}
+.gcard.draw{animation:gdraw .7s cubic-bezier(.2,.7,.2,1);transform-origin:50% 100%}
+@keyframes gdraw{0%{transform:translate(calc(var(--step)*-1),2px) rotate(-3deg)}45%{transform:translate(calc(var(--step)*-.6),-34px) rotate(-5deg)}100%{transform:none}}
 @keyframes gshine{from{background-position:120% 0}to{background-position:-60% 0}}
 /* Card book */
 .gacha-progress{margin-bottom:12px;font:14px/1.5 var(--mono)}
@@ -522,15 +528,18 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 @media(max-width:780px){
   .draw-banner{gap:14px;padding:20px var(--gut)}
   .draw-banner .btn{width:100%}
-  .draw-fan{display:none}
+  .draw-art{height:84px}
+  .draw-banner .draw-text{min-width:0}
   .gacha-panel{padding:12px}
-  .gcard-stage{min-height:290px}
+  .gcard-stage{min-height:300px;margin-bottom:22px;--step:11px}
   .gcard{width:172px}
+  .gslot,.gdeck{transform:translateX(22px)}
+  .gdeck .gcard{left:-86px;top:-137.600px}
   .lock-mark{font-size:52px}
   .alien-says{font-size:12px}
   .mintscreen{padding:18px 16px}
   .mintscreen pre{font-size:13px}
   .dos-alien{width:65px;height:65px;margin-bottom:14px}
 }
-@media(prefers-reduced-motion:reduce){.gcard.shake,.gcard.t3 .gcard-front::after,.dos-cursor,.mintscreen.glitch,.mintscreen.glitch>*{animation:none}}
+@media(prefers-reduced-motion:reduce){.gcard.draw,.gcard.t3 .gcard-front::after,.dos-cursor,.mintscreen.glitch,.mintscreen.glitch>*{animation:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}

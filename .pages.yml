@@ -379,6 +379,10 @@ content:
     type: string
     list: true
     description: 메인 그림을 5번 누르면 이 중 하나가 나옵니다.
+  - name: drawImage
+    label: INFO · 카드 뽑기 띠 그림
+    type: image
+    description: INFO 화면 아래 '카드 뽑기' 띠 왼쪽의 그림입니다. 배경이 투명한 PNG를 권합니다. 비워 두면 뽑기 기계 그림이 쓰입니다.
   - name: card
     label: 카드 디자인 (뒷면 → 앞면)
     type: object

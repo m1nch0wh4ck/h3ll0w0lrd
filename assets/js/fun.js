@@ -56,7 +56,7 @@ const owned=c=>MintDex.read()[MintDex.key(c.work.id,c.src)]||0;
 document.body.insertAdjacentHTML('beforeend',`
 <dialog class="fun-win gacha" id="gacha" aria-labelledby="gacha-title"><div class="dialogbar"><strong id="gacha-title">card_draw.exe — 카드 뽑기</strong><div class="lightbox-buttons"><button type="button" data-close aria-label="닫기">✕</button></div></div>
 <div class="tabs" role="tablist" aria-label="카드 뽑기"><button type="button" class="tab" role="tab" id="gtab-draw" aria-controls="gacha-draw" aria-selected="true">뽑기</button><button type="button" class="tab" role="tab" id="gtab-book" aria-controls="gacha-book" aria-selected="false">카드첩 <span id="gacha-count"></span></button></div>
-<div class="gacha-panel" id="gacha-draw" role="tabpanel" aria-labelledby="gtab-draw"><div class="gcard-stage" id="gacha-stage"></div><p class="gacha-msg" id="gacha-msg" role="status"></p><div class="gacha-actions" id="gacha-result" hidden><a class="btn btn-s" id="gacha-go" href="#collection">작품 보기</a><button type="button" class="btn btn-s" id="gacha-zoom-open">크게 보기</button></div><div class="gacha-actions"><button type="button" class="btn btn-p" id="gacha-pull">카드 뽑기</button><span class="gacha-left" id="gacha-left"></span></div><p class="gacha-odds" id="gacha-odds"></p></div>
+<div class="gacha-panel" id="gacha-draw" role="tabpanel" aria-labelledby="gtab-draw"><div class="gcard-stage"><div class="gdeck" aria-hidden="true">${`<div class="gcard t1"><div class="gcard-in">${BACK}</div></div>`.repeat(4)}</div><div class="gslot" id="gacha-stage"></div></div><p class="gacha-msg" id="gacha-msg" role="status"></p><div class="gacha-actions" id="gacha-result" hidden><a class="btn btn-s" id="gacha-go" href="#collection">작품 보기</a><button type="button" class="btn btn-s" id="gacha-zoom-open">크게 보기</button></div><div class="gacha-actions"><button type="button" class="btn btn-p" id="gacha-pull">카드 뽑기</button><span class="gacha-left" id="gacha-left"></span></div><p class="gacha-odds" id="gacha-odds"></p></div>
 <div class="gacha-panel" id="gacha-book" role="tabpanel" aria-labelledby="gtab-book" hidden></div></dialog>
 <dialog class="fun-win gzoom" id="gzoom" aria-labelledby="gzoom-title"><div class="dialogbar"><strong id="gzoom-title"></strong><div class="lightbox-buttons"><button type="button" data-close aria-label="닫기">✕</button></div></div><div class="lightbox-body"><img id="gzoom-img" alt=""></div><div class="lightbox-foot"><span id="gzoom-tier"></span><a id="gzoom-go" href="#collection">작품 보기</a></div></dialog>
 <dialog class="fun-win ask" id="ask-win" aria-labelledby="ask-title"><div class="dialogbar"><strong id="ask-title">ask.exe — 지구에서 보내는 말</strong><div class="lightbox-buttons"><a class="ask-out" id="ask-out" href="https://asked.kr/m1nch0wh4ck" target="_blank" rel="noopener noreferrer">새 창</a><button type="button" data-close aria-label="닫기">✕</button></div></div><div class="ask-body"><p class="ask-wait">애스크를 불러오는 중입니다. 창이 계속 비어 있으면 위의 '새 창'을 눌러 주세요.</p><iframe id="ask-frame" title="민초파왹 애스크" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerpolicy="no-referrer"></iframe></div></dialog>`);
@@ -73,10 +73,11 @@ async function pull(){
  busy=true;if(s.used<DAILY)s.used++;else s.bonus--;save(s);
  const c=pick();last=c;const count=MintDex.add(c.work.id,c.src);
  $('gacha-result').hidden=true;$('gacha-msg').textContent='교신 중…';renderLeft();
- $('gacha-stage').innerHTML=cardHTML(c,'shake');const el=$('gacha-stage').firstElementChild;
+ // The card is drawn off the pile, then turned over.
+ $('gacha-stage').innerHTML=cardHTML(c,'draw');const el=$('gacha-stage').firstElementChild;
  // The picture is loaded before the card turns over, so the reveal never shows an empty frame.
  const img=el.querySelector('img');await Promise.all([wait(700),img.decode?img.decode().catch(()=>{}):null]);
- el.classList.remove('shake');el.classList.add('flipped');await wait(450);
+ el.classList.remove('draw');el.classList.add('flipped');await wait(450);
  $('gacha-msg').innerHTML=`<b>${STARS(c.tier)}</b> ${esc(c.work.name)} — ${count===1?'새 카드!':`이미 가진 카드 (${count}장째)`}`;
  $('gacha-go').href='#work/'+c.work.id;$('gacha-result').hidden=false;
  busy=false;renderLeft();window.dispatchEvent(new Event('mint:dex'));
@@ -97,7 +98,7 @@ $('gtab-draw').addEventListener('click',()=>tab('draw'));$('gtab-book').addEvent
 $('gacha-zoom-open').addEventListener('click',()=>last&&zoom(last));
 $('gacha-book').addEventListener('click',e=>{const b=e.target.closest('[data-card]');if(b)zoom(CARDS[Number(b.dataset.card)]);});
 window.addEventListener('mint:gacha',openGacha);
-if(CARDS.length){document.querySelectorAll('[data-open-gacha]').forEach(b=>{b.hidden=false;b.addEventListener('click',openGacha);});document.querySelectorAll('[data-gacha-show]').forEach(el=>{el.hidden=false;});if(CARD_BACK)document.querySelectorAll('.draw-fan i').forEach(i=>{i.style.backgroundImage=`url("${encodeURI(CARD_BACK)}")`;});renderLeft();}
+if(CARDS.length){document.querySelectorAll('[data-open-gacha]').forEach(b=>{b.hidden=false;b.addEventListener('click',openGacha);});document.querySelectorAll('[data-gacha-show]').forEach(el=>{el.hidden=false;});const art=safeURL(FUN.drawImage);if(art&&$('draw-art'))$('draw-art').src=art;renderLeft();}
 
 // ---- Ask window: the ask page inside a window on this site ----------------------------------
 // Plain clicks open the window; ctrl/shift/middle clicks still open a new tab as before.
