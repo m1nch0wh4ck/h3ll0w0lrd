@@ -73,6 +73,7 @@ content:
       - 서부극
       - 스포츠
       - 청춘
+      - 느와르
       multiple: true
   - name: type
     label: 1인 / 다인
@@ -141,12 +142,12 @@ content:
         multiple: false
       required: true
     - name: safety
-      label: 세이프티 / 언세이프티
+      label: 세이프 / 언세이프
       type: select
       options:
         values:
-        - 세이프티
-        - 언세이프티
+        - 세이프
+        - 언세이프
         multiple: true
       required: true
     - name: releaseNote
