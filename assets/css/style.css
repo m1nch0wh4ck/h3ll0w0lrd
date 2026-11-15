@@ -515,7 +515,8 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 @keyframes mglitch{0%{transform:none}8%{transform:translate(-10px,2px) skewX(-8deg);text-shadow:5px 0 #ff3688,-5px 0 #1f3fbf}16%{transform:translate(12px,-3px);clip-path:inset(8% 0 58% 0)}24%{transform:translate(-14px,5px) skewX(10deg);clip-path:inset(55% 0 6% 0);text-shadow:-6px 0 #ff3688,6px 0 #1f3fbf}36%{transform:translate(6px,0);clip-path:none;text-shadow:none}48%{transform:translate(-4px,-2px) scaleY(1.04);clip-path:inset(30% 0 34% 0);text-shadow:4px 0 #ff3688,-4px 0 #1f3fbf}60%{transform:translate(8px,2px) skewX(-4deg);clip-path:none}72%{transform:translate(-3px,0);text-shadow:2px 0 #ff3688,-2px 0 #1f3fbf}84%{transform:none;text-shadow:none}}
 @keyframes gblink{50%{opacity:.25}}
 .saver{position:fixed;inset:0;z-index:55;background:#050806;overflow:hidden;cursor:none}
-.saver i{position:absolute;left:0;top:0;will-change:transform}
+.saver i{position:absolute;left:0;top:0;will-change:transform;transition:none}
+.saver p{z-index:1}
 .saver i img{display:block;height:96px;width:auto}
 .saver p{position:absolute;left:0;right:0;bottom:16px;color:#535c56;font:12px/1 var(--mono);text-align:center}
 @media(max-width:780px){
