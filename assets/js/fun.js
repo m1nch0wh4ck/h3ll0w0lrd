@@ -97,14 +97,22 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="https:/
 const closeBox=document.querySelector('.titlebar .window-controls span:last-child');
 if(closeBox){closeBox.classList.add('egg-close');closeBox.addEventListener('click',()=>{
  const el=document.createElement('div');el.className='mintscreen';el.setAttribute('role','alertdialog');el.setAttribute('aria-label','민트스크린');el.tabIndex=-1;
- const LINES=[['h2','','MINT_CHOCO_OVERFLOW'],['p','','민트초코 농도가 허용치를 초과했습니다.\n이 창은 닫히지 않습니다. 지구인의 기기는 안전합니다.'],['p','mintscreen-code','STOP: 0xM1NT_CH0C0 (extra mint, extra chips)\n*** MEMORY DUMP: mint 100% / choco 100% / toothpaste 0%']];
- el.innerHTML=`<div><p class="mintscreen-face">👽</p>${LINES.map(([tag,cls,text])=>`<${tag} class="${cls}" aria-label="${esc(text)}"></${tag}>`).join('')}<p class="mintscreen-tip" hidden>아무 곳이나 누르면 돌아갑니다 _</p></div>`;
+ // Drawn like a DOS screen: the command is typed at the prompt, the output is printed a whole line at a time,
+ // then the screen glitches once before the last line appears.
+ const CMD='close_window.exe';
+ const OUT=['Bad command or flavor name.','','MINT_CHOCO_OVERFLOW','민트초코 농도가 허용치를 초과했습니다.','이 창은 닫히지 않습니다. 지구인의 기기는 안전합니다.','','STOP: 0xM1NT_CH0C0 (extra mint, extra chips)','*** MEMORY DUMP: mint 100% / choco 100% / toothpaste 0%',''];
+ const TIP='아무 곳이나 누르면 돌아갑니다. ';
+ el.innerHTML='<pre><span></span><i class="dos-cursor" aria-hidden="true"></i></pre>';
  document.body.appendChild(el);el.focus();
- // The text is typed out line by line, then the screen glitches once before the hint appears.
- let alive=true;(async()=>{const slots=[...el.querySelectorAll('[aria-label]')];
-  for(const [i,[, ,text]] of LINES.entries()){if(calm){slots[i].textContent=text;continue;}for(const ch of text){if(!alive)return;slots[i].textContent+=ch;await new Promise(r=>setTimeout(r,ch==='\n'?160:16));}await new Promise(r=>setTimeout(r,180));}
-  if(!alive)return;if(!calm){el.classList.add('glitch');await new Promise(r=>setTimeout(r,650));el.classList.remove('glitch');}
-  el.querySelector('.mintscreen-tip').hidden=false;})();
+ const out=el.querySelector('span');const pause=ms=>new Promise(r=>setTimeout(r,ms));
+ let alive=true;(async()=>{
+  if(calm){out.textContent=['C:\\M1NCH0WH4CK>'+CMD,...OUT,TIP].join('\n');return;}
+  out.textContent='C:\\M1NCH0WH4CK>';await pause(500);
+  for(const ch of CMD){if(!alive)return;out.textContent+=ch;await pause(45+Math.random()*50);}
+  await pause(350);
+  for(const line of OUT){if(!alive)return;out.textContent+='\n'+line;await pause(line?130:60);}
+  if(!alive)return;await pause(250);el.classList.add('glitch');await pause(650);el.classList.remove('glitch');
+  out.textContent+='\n'+TIP;})();
  const end=()=>{alive=false;el.remove();document.removeEventListener('keydown',end);foundEgg('mintscreen');};
  // Armed a moment later so the tap that opened it does not close it again.
  setTimeout(()=>{el.addEventListener('click',end);document.addEventListener('keydown',end);},250);
