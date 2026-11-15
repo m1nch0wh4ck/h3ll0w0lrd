@@ -39,6 +39,9 @@ try{
 try{const r=await fetch('data/site.json',{cache:'no-cache'});const f=r.ok?(await r.json()||{}).fun:null;if(f&&typeof f==='object')FUN=f;}catch(error){console.error(error);}
 const CARD_BACK=safeURL(FUN.cardBack),SAVER_IMG=safeURL(FUN.saverImage);
 const ALIEN_LINES=(Array.isArray(FUN.alienLines)?FUN.alienLines:[]).map(x=>String(x||'').trim()).filter(Boolean);
+// Front frames by rarity (transparent PNG laid over the picture). A tier without one keeps the built-in frame.
+const FRAMES={1:safeURL(FUN.frame1),2:safeURL(FUN.frame2),3:safeURL(FUN.frame3)};
+const FRAME_LIGHT={1:FUN.frame1Text==='밝은 글자',2:FUN.frame2Text==='밝은 글자',3:FUN.frame3Text==='밝은 글자'};
 const BACK=CARD_BACK?`<div class="gcard-back art"><img src="${esc(CARD_BACK)}" alt=""></div>`:`<div class="gcard-back"><span>${UFO}</span><b>?</b></div>`;
 const owned=c=>MintDex.read()[MintDex.key(c.work.id,c.src)]||0;
 
@@ -52,7 +55,7 @@ document.body.insertAdjacentHTML('beforeend',`
 document.querySelectorAll('.fun-win').forEach(d=>{d.addEventListener('click',e=>{if(e.target===d||e.target.closest('[data-close]'))d.close();});});
 window.addEventListener('hashchange',()=>document.querySelectorAll('.fun-win[open]').forEach(d=>d.close()));
 
-const cardHTML=(c,cls='')=>`<div class="gcard t${c.tier} ${cls}"><div class="gcard-in">${BACK}<div class="gcard-front"><img src="${esc(c.src)}" alt="${esc(c.work.name)}"><span class="gcard-tier">${STARS(c.tier)}</span><span class="gcard-plate"><small>No.${esc(c.work.number)}</small><b>${esc(c.work.name)}</b></span></div></div></div>`;
+const cardHTML=(c,cls='')=>`<div class="gcard t${c.tier} ${cls}"><div class="gcard-in">${BACK}<div class="gcard-front${FRAMES[c.tier]?' framed'+(FRAME_LIGHT[c.tier]?' light':''):''}"><img src="${esc(c.src)}" alt="${esc(c.work.name)}">${FRAMES[c.tier]?`<img class="gcard-frame" src="${esc(FRAMES[c.tier])}" alt="">`:''}<span class="gcard-tier">${STARS(c.tier)}</span><span class="gcard-plate"><small>No.${esc(c.work.number)}</small><b>${esc(c.work.name)}</b></span></div></div></div>`;
 function renderLeft(){if(!$('gacha-left'))return;const n=left(load());$('gacha-left').textContent=`남은 뽑기 ${n}회`;$('gacha-pull').disabled=busy||n<1||!CARDS.length;$('gacha-count').textContent=`${CARDS.filter(owned).length}/${CARDS.length}`;if($('draw-progress'))$('draw-progress').textContent=`모은 카드 ${CARDS.filter(owned).length}/${CARDS.length} · 오늘 남은 뽑기 ${n}회`;}
 let busy=false,last=null;
 function pick(){const tiers=[1,2,3].filter(t=>CARDS.some(c=>c.tier===t));let roll=Math.random()*tiers.reduce((n,t)=>n+ODDS[t],0);const tier=tiers.find(t=>(roll-=ODDS[t])<0)||tiers[0];const pool=CARDS.filter(c=>c.tier===tier);return pool[Math.floor(Math.random()*pool.length)];}

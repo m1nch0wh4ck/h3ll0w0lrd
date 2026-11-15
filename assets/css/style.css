@@ -459,6 +459,13 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .gcard-plate{flex:0 0 auto;display:flex;flex-direction:column;gap:2px;padding:6px 4px 7px;background:var(--paper);border-top:4px solid var(--frame);text-align:center}
 .gcard-plate small{font:11px/1 var(--mono)}
 .gcard-plate b{font:700 15px/1.2 var(--px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gcard-front.framed{display:block;border:0}
+.gcard-front.framed img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.gcard-front.framed .gcard-frame{object-fit:fill}
+.gcard-front.framed .gcard-tier{display:none}
+.gcard-front.framed .gcard-plate{position:absolute;left:0;right:0;bottom:0;height:13.75%;justify-content:center;padding:0 12%;border:0;background:none}
+.gcard-front.framed.light .gcard-plate{color:var(--paper)}
+.gcard.mini .gcard-front.framed .gcard-plate{padding:0 8%}
 .gcard.t3 .gcard-front::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff8c 45%,#00efb266 52%,transparent 65%);background-size:260% 100%;animation:gshine 2.6s linear infinite;pointer-events:none}
 .gcard.shake{animation:gshake .7s ease-in-out}
 @keyframes gshake{0%,100%{transform:rotate(0)}15%{transform:rotate(-5deg)}30%{transform:rotate(5deg)}45%{transform:rotate(-7deg) scale(1.03)}60%{transform:rotate(7deg) scale(1.03)}80%{transform:rotate(-3deg)}}
