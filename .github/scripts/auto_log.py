@@ -6,6 +6,10 @@ Usage: auto_log.py BEFORE AFTER [--dry-run]
 Only the platform list is compared (name + safety identify a platform, status is what changes).
 Text, link and image edits produce nothing. A work only gets a "새 작품" entry once one of its
 platforms is 공개 중, so registering a work before launch stays quiet.
+
+It also counts platform versions in _data/versions.json ({work id: {"플랫폼|세이프티": n}}):
+a platform entry gets 1 the first time it is 공개 중, and +1 each time its link, status or
+버전별 안내 changes while it is 공개 중. Nothing is typed by hand; the homepage shows "v n".
 """
 import datetime
 import json
@@ -16,6 +20,7 @@ import uuid
 
 WORKS = '_data/works'
 LOGS = '_data/logs'
+VERSIONS = '_data/versions.json'
 PUBLIC = '공개 중'
 NAMESPACE = uuid.UUID('6f1c1d3e-8f0a-4c51-9d55-3a9b8f0e2c71')
 KST = datetime.timezone(datetime.timedelta(hours=9))
@@ -48,8 +53,39 @@ def platforms(work):
     return out
 
 
+def platform_details(work):
+    """{"플랫폼|세이프티": (link, status, 버전별 안내)} for the first entry with each key."""
+    out = {}
+    for p in (work or {}).get('platforms') or []:
+        if isinstance(p, dict) and p.get('name'):
+            key = p['name'] + '|' + '/'.join(p.get('safety') or [])
+            out.setdefault(key, (p.get('url') or '', p.get('status') or '', p.get('releaseNote') or ''))
+    return out
+
+
+def count_versions(before, after, versions):
+    """Update versions in place; return the lines describing what changed."""
+    changes = []
+    for work_id, work in after.items():
+        old = platform_details(before.get(work_id))
+        for key, details in platform_details(work).items():
+            if details[1] != PUBLIC:
+                continue
+            current = versions.get(work_id, {}).get(key)
+            if current is None:
+                new = 1
+            elif key in old and old[key] != details:
+                new = current + 1
+            else:
+                continue
+            versions.setdefault(work_id, {})[key] = new
+            changes.append(f'{work["name"]} · {key.replace("|", " ").replace("세이프티", "세이프")} → v{new}')
+    return changes
+
+
 def label(key):
-    return ' '.join(part for part in key if part)
+    # The homepage shows the short names (세이프 / 언세이프); the stored values keep the long ones.
+    return ' '.join(part for part in key if part).replace('세이프티', '세이프')
 
 
 def is_public(work):
@@ -104,7 +140,8 @@ def main():
     committed = datetime.datetime.fromisoformat(git('show', '-s', '--format=%cI', after_ref).strip())
     date = committed.astimezone(KST).strftime('%Y-%m-%d')
     count = 0
-    for work, title, category, tag, body in entries(load_works(before_ref), load_works(after_ref)):
+    before_works, after_works = load_works(before_ref), load_works(after_ref)
+    for work, title, category, tag, body in entries(before_works, after_works):
         # Same commit + work always gives the same id, so a re-run overwrites instead of duplicating.
         log_id = str(uuid.uuid5(NAMESPACE, f'{after_ref}:{work["id"]}'))
         record = {'id': log_id, 'date': date, 'title': title, 'category': category}
@@ -121,6 +158,26 @@ def main():
                 json.dump(record, f, ensure_ascii=False, indent=2)
                 f.write('\n')
     print(f'{count} log entr{"y" if count == 1 else "ies"}.')
+    try:
+        with open(VERSIONS, encoding='utf-8') as f:
+            versions = json.load(f)
+        if not isinstance(versions, dict):
+            versions = {}
+    except (OSError, json.JSONDecodeError):
+        versions = {}
+    # "_commit" remembers the last commit counted, so running the same comparison again does not count twice.
+    if versions.get('_commit') == after_ref:
+        print('Versions already counted for this commit.')
+        return
+    changes = count_versions(before_works, after_works, versions)
+    for line in changes:
+        print(('[dry-run] ' if dry else '') + line)
+    print(f'{len(changes)} version change{"" if len(changes) == 1 else "s"}.')
+    if changes and not dry:
+        versions['_commit'] = after_ref
+        with open(VERSIONS, 'w', encoding='utf-8') as f:
+            json.dump(versions, f, ensure_ascii=False, indent=2)
+            f.write('\n')
 
 
 if __name__ == '__main__':

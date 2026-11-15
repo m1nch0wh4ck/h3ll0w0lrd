@@ -57,8 +57,11 @@ content:
     label: 한 줄 소개
     type: text
   - name: description
-    label: 작품 소개
-    type: text
+    label: 작품 소개문 HTML
+    type: code
+    options:
+      language: html
+    description: 플랫폼에 올린 소개 페이지 HTML을 그대로 붙여 넣으세요. 작품 상세에 원본 모습대로 나옵니다. 태그 없이 글만 적으면 일반 글로 나옵니다.
   - name: genres
     label: 장르
     type: select
@@ -99,9 +102,22 @@ content:
     type: string
     list: true
     description: 소꿉친구, 재회, 집착 등 원하는 키워드를 하나씩 추가하세요.
-  - name: role
-    label: 유저 역할
-    type: text
+  - name: personas
+    label: 추천 페르소나
+    type: object
+    list: true
+    description: 멜로이에 등록한 추천 페르소나를 하나씩 추가하세요. 작품 상세에 이미지·이름·설명이 나란히 나옵니다.
+    fields:
+    - name: image
+      label: 페르소나 이미지
+      type: image
+    - name: name
+      label: 이름
+      type: string
+      required: true
+    - name: description
+      label: 설명
+      type: text
   - name: start
     label: 시작 상황
     type: text
@@ -153,6 +169,7 @@ content:
     - name: releaseNote
       label: 버전별 안내
       type: text
+      description: 버전 숫자(v1, v2…)는 적지 않아도 됩니다. 공개 중인 플랫폼 항목의 링크·상태·버전별 안내를 고쳐 저장하면 자동으로 1씩 올라갑니다.
   - name: coverLines
     label: 이미지 없을 때 표지 문구
     type: string

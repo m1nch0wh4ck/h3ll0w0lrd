@@ -219,6 +219,7 @@ img{display:block;max-width:100%}
 .play-group .pfm svg{width:20px;height:20px}
 .play-row{align-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:48px;padding-left:28px}
 .play-what{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;font-size:14px}
+.ver{font:13px/1.6 var(--mono)}
 .play-what small{flex-basis:100%;font-size:14px;color:var(--text2)}
 .play-none{padding:12px 0}
 #copy-link{align-self:flex-start;margin-top:16px;font-weight:400}
@@ -226,6 +227,16 @@ img{display:block;max-width:100%}
 .detail-block{display:flex;flex-direction:column;gap:12px;padding-top:24px;border-top:2px solid var(--ink)}
 .detail-block h3{font:700 24px/1.4 var(--px)}
 .detail-block>p{max-width:680px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
+
+/* 작품 소개: the platform's intro page, shown as made (designed for a phone-wide column) */
+.intro-frame{display:block;width:100%;max-width:480px;height:320px;border:1px solid var(--ink);background:#fff}
+/* 추천 페르소나 */
+.persona-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:24px}
+.persona{min-width:0;display:flex;flex-direction:column;gap:8px}
+.persona-art{padding:6px;background:var(--ink)}
+.persona-art img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 20%;border:3px solid var(--mint)}
+.persona h4{margin:0;font:700 18px/1.4 var(--px);overflow-wrap:anywhere}
+.persona p{line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
 
 /* Gallery viewer window + original-size dialog */
 .viewer{padding:6px;background:var(--silver);border:1px solid var(--ink);box-shadow:inset 2px 2px #edf3ec,inset -2px -2px #677069}
@@ -311,6 +322,7 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   .back{margin-bottom:-24px}
   .detail-cover{flex-basis:100%;max-width:300px;margin:0 auto}
   .detail-title h2{font-size:36px}
+  .persona-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px}
   .viewer-body{grid-template-columns:1fr;height:auto}
   .viewer-preview{height:300px}
   .viewer-thumbs{max-height:240px;grid-template-columns:repeat(auto-fill,minmax(76px,1fr))}

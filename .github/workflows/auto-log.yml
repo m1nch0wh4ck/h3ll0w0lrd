@@ -1,6 +1,7 @@
 # 작품 수집첩(_data/works)이 main에 저장되면 플랫폼 상태 변화를 비교해 LOG(_data/logs)를 자동으로 씁니다.
 # 공개·리뉴얼 예정·제작 중·공개 중단으로 바뀐 것과, 공개 플랫폼이 처음 생긴 새 작품만 기록합니다.
 # 소개문·링크·이미지 수정은 기록하지 않습니다. 기록은 CMS의 'LOG · 제작 기록'에서 고치거나 숨길 수 있습니다.
+# 같은 때에 플랫폼별 버전(_data/versions.json)도 셉니다: 공개 중인 플랫폼 항목의 링크·상태·버전별 안내가 바뀌면 +1.
 name: 작품 변경 → LOG 자동 기록
 
 on:
@@ -48,17 +49,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git add _data/logs
+          git add _data/logs _data/versions.json
           if git diff --cached --quiet; then echo "새 기록 없음"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git commit -q -m "LOG 자동 기록 (작품 상태 변경)"
+          git commit -q -m "LOG·버전 자동 기록 (작품 변경)"
           pushed=
           for i in 1 2 3 4; do
             if git pull -q --rebase origin main && git push -q origin HEAD:main; then pushed=1; break; fi
             sleep $((i * 5))
           done
-          [ -n "$pushed" ] || { echo "::error::LOG 자동 기록을 main에 올리지 못했습니다."; exit 1; }
+          [ -n "$pushed" ] || { echo "::error::자동 기록을 main에 올리지 못했습니다."; exit 1; }
           # Pushes made with this token may not start a Pages build on their own, so ask for one.
           curl -sS -o /dev/null -w "Pages 빌드 요청: %{http_code}\n" -X POST \
             -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \

@@ -83,10 +83,16 @@ try {
  const response=await fetch('data/works.json',{cache:'no-cache'});
  if(!response.ok)throw new Error('작품 목록을 불러오지 못했습니다.');
  const records=await response.json();
+ // Platform versions are counted by the auto-log workflow (_data/versions.json); the page still works without them.
+ let VERSIONS={};try{const r=await fetch('data/versions.json',{cache:'no-cache'});if(r.ok)VERSIONS=await r.json()||{};}catch{}
  const list=v=>Array.isArray(v)?v:[];
+ // 작품 소개문 HTML: the HTML pasted from the platform. Text without any tag is shown as plain text.
+ const isHTML=s=>/<[a-z][^>]*>/i.test(s);
+ const plainText=s=>{if(!isHTML(s))return s;const d=new DOMParser().parseFromString(s,'text/html');d.querySelectorAll('style,script').forEach(el=>el.remove());return d.body.textContent.replace(/\s+/g,' ').trim();};
  const safeURL=v=>{if(typeof v!=='string'||!v.trim())return '';try{const u=new URL(v,location.href);return ['https:','http:'].includes(u.protocol)?v:'';}catch{return '';}};
  const WORKS=Object.values(records||{}).filter(w=>w&&/^[a-z0-9-]+$/.test(w.id)&&w.name).map(w=>({
-  ...w, name:String(w.name),number:String(w.number||''),description:String(w.description||''),
+  ...w, name:String(w.name),number:String(w.number||''),description:String(w.description||''),descText:plainText(String(w.description||'')),
+  personas:list(w.personas).filter(p=>p&&typeof p==='object'&&p.name).map(p=>({name:String(p.name),description:String(p.description||''),image:safeURL(p.image)})),
   image:safeURL(w.image),genres:list(w.genres),romance:list(w.romance),keywords:list(w.keywords),
   gallery:list(w.gallery).map(safeURL).filter(Boolean),
   platforms:list(w.platforms).map(p=>({...p,url:safeURL(p.url),safety:list(p.safety)}))
@@ -96,7 +102,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const viewport=$('screen-viewport');let currentRoute=null;const scrollPositions=new Map();let lastCard=null;
 function matchesWork(w){
  const q=$('search').value.trim().toLowerCase();
- if(![w.name,w.tagline||'',w.description,...w.keywords,...w.genres].join(' ').toLowerCase().includes(q))return false;
+ if(![w.name,w.tagline||'',w.descText,...w.keywords,...w.genres].join(' ').toLowerCase().includes(q))return false;
  if($('genre').value!=='all'&&!w.genres.includes($('genre').value))return false;
  if($('cast').value!=='all'&&w.type!==$('cast').value)return false;
  if($('romance').value!=='all'&&!w.romance.includes($('romance').value))return false;
@@ -115,15 +121,45 @@ const statusChip=s=>s?`<span class="st" data-status="${esc(s)}">${esc(s)}</span>
 function platformLines(w){const out=[];w.platforms.forEach(p=>{let g=out.find(x=>x.name===p.name&&x.status===p.status);if(!g){g={name:p.name,status:p.status,safety:[]};out.push(g);}p.safety.forEach(s=>{if(!g.safety.includes(s))g.safety.push(s);});});return out;}
 const TRANSPORT='<svg aria-hidden="true" width="94" height="16" viewBox="0 0 94 16"><path fill="#141615" d="M2 3l9 5-9 5zM20 3h3v10h-3zM26 3h3v10h-3zM38 3h10v10H38zM64 3h2v10h-2zM75 3v10l-8-5zM82 3l8 5-8 5zM91 3h2v10h-2z"/><path stroke="#747d76" d="M56.5 1v14"/></svg>';
 // Collection card: an old media-player window. The top part (title bar to play buttons) is one link to the work.
-function renderCards(){const found=WORKS.filter(matchesWork);$('cards').innerHTML=found.map(w=>{const lines=platformLines(w);const summary=w.tagline||w.description;const keys=w.keywords.slice(0,3);return `<article class="win"><a class="card" href="#work/${esc(w.id)}" data-id="${esc(w.id)}" aria-label="${esc(w.name)} 작품 소개 열기"><span class="tbar"><span>${esc(w.id)}.avi</span><span class="wctl">${WINDOW_CONTROLS}</span></span><span class="scr${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="" loading="lazy">`:`<span class="typo-cover">${(w.coverLines||[w.name[0],w.name.slice(1)]).map(esc).join('<br>')}</span>`}</span><span class="plate"><span class="no">No.${esc(w.number)}</span><span class="nm" role="heading" aria-level="3">${esc(w.name)}</span></span><span class="seek"><i></i></span><span class="tp">${TRANSPORT}</span></a><div class="info">${lines.length?`<div class="prow">${lines.map(p=>`<div class="pl">${platformTag(p.name)}<span>${safeText(p.safety)}</span>${statusChip(p.status)}</div>`).join('')}</div>`:''}${summary?`<div class="row"><span class="lab">소개</span><p class="tx">${esc(summary)}</p></div>`:''}${keys.length?`<div class="row"><span class="lab">태그</span><p class="tg">${keys.map(k=>'#'+esc(k)).join(' ')}</p></div>`:''}</div></article>`;}).join('');$('empty').hidden=found.length!==0;$('result-count').textContent=`${WORKS.length}편 중 ${found.length}편`;}
+function renderCards(){const found=WORKS.filter(matchesWork);$('cards').innerHTML=found.map(w=>{const lines=platformLines(w);const summary=w.tagline||(isHTML(w.description)?'':w.description);const keys=w.keywords.slice(0,3);return `<article class="win"><a class="card" href="#work/${esc(w.id)}" data-id="${esc(w.id)}" aria-label="${esc(w.name)} 작품 소개 열기"><span class="tbar"><span>${esc(w.id)}.avi</span><span class="wctl">${WINDOW_CONTROLS}</span></span><span class="scr${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="" loading="lazy">`:`<span class="typo-cover">${(w.coverLines||[w.name[0],w.name.slice(1)]).map(esc).join('<br>')}</span>`}</span><span class="plate"><span class="no">No.${esc(w.number)}</span><span class="nm" role="heading" aria-level="3">${esc(w.name)}</span></span><span class="seek"><i></i></span><span class="tp">${TRANSPORT}</span></a><div class="info">${lines.length?`<div class="prow">${lines.map(p=>`<div class="pl">${platformTag(p.name)}<span>${safeText(p.safety)}</span>${statusChip(p.status)}</div>`).join('')}</div>`:''}${summary?`<div class="row"><span class="lab">소개</span><p class="tx">${esc(summary)}</p></div>`:''}${keys.length?`<div class="row"><span class="lab">태그</span><p class="tg">${keys.map(k=>'#'+esc(k)).join(' ')}</p></div>`:''}</div></article>`;}).join('');$('empty').hidden=found.length!==0;$('result-count').textContent=`${WORKS.length}편 중 ${found.length}편`;}
 function block(title,text){return text?`<section class="detail-block"><h3>${title}</h3><p>${esc(text)}</p></section>`:'';}
+const versionOf=(w,p)=>{const v=VERSIONS&&VERSIONS[w.id]&&VERSIONS[w.id][p.name+'|'+p.safety.join('/')];return Number.isInteger(v)&&v>0?v:0;};
+// 작품 소개: the platform's intro HTML is shown as it is, inside a sandboxed frame where no script can run.
+// The same limits as the platform apply: no script / iframe / embed / object, no on* attributes or javascript: links,
+// https images only, outside style sheets only from Google Fonts (plus jsDelivr, which already serves this site's pixel font).
+const FONT_HOSTS=['fonts.googleapis.com','cdn.jsdelivr.net'];
+const fontHost=u=>{try{const x=new URL(u);return x.protocol==='https:'&&FONT_HOSTS.includes(x.hostname);}catch{return false;}};
+function cleanIntro(html){
+ const doc=new DOMParser().parseFromString(String(html),'text/html');
+ doc.querySelectorAll('script,iframe,frame,embed,object,base,meta,form,noscript,template').forEach(el=>el.remove());
+ doc.querySelectorAll('link').forEach(el=>{if(!(/stylesheet/i.test(el.getAttribute('rel')||'')&&fontHost(el.getAttribute('href'))))el.remove();});
+ doc.querySelectorAll('style').forEach(el=>{if([...el.textContent.matchAll(/@import\s+(?:url\(\s*)?['"]?([^'")\s;]+)/gi)].some(m=>!fontHost(m[1])))el.remove();});
+ doc.querySelectorAll('*').forEach(el=>{for(const a of [...el.attributes]){const n=a.name.toLowerCase();if(n.startsWith('on')||n==='srcdoc'||(['href','src','xlink:href','action','formaction'].includes(n)&&/^\s*(javascript|vbscript|data):/i.test(a.value)))el.removeAttribute(a.name);}});
+ doc.querySelectorAll('img').forEach(el=>{if(!/^https:\/\//i.test(el.getAttribute('src')||''))el.remove();});
+ return [...doc.head.querySelectorAll('style,link')].map(el=>el.outerHTML).join('')+doc.body.innerHTML;
+}
+function introBlock(w){
+ if(!isHTML(w.description))return block('작품 소개',w.description||'상세 소개를 준비하고 있습니다.');
+ return `<section class="detail-block"><h3>작품 소개</h3><iframe class="intro-frame" id="intro-frame" title="${esc(w.name)} 작품 소개" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></section>`;
+}
+// The frame grows with its content (images loading, <details> opening, tabs switching), so it never scrolls on its own.
+function mountIntro(w){
+ const frame=$('intro-frame');if(!frame)return;
+ const fit=()=>{const d=frame.contentDocument;if(d&&d.body)frame.style.height=Math.ceil(d.body.getBoundingClientRect().height)+'px';};
+ frame.addEventListener('load',()=>{fit();const d=frame.contentDocument;if(d&&d.body&&'ResizeObserver' in window)new ResizeObserver(fit).observe(d.body);});
+ frame.srcdoc=`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base target="_blank"><style>html,body{margin:0}body{display:flow-root;overflow-x:hidden;word-break:keep-all}img{max-width:100%}</style></head><body>${cleanIntro(w.description)}</body></html>`;
+}
+function personaBlock(w){
+ if(!w.personas.length)return '';
+ return `<section class="detail-block"><h3>추천 페르소나</h3><div class="persona-grid">${w.personas.map(p=>`<article class="persona">${p.image?`<div class="persona-art"><img src="${esc(p.image)}" alt="" loading="lazy"></div>`:''}<h4>${esc(p.name)}</h4>${p.description?`<p>${esc(p.description)}</p>`:''}</article>`).join('')}</div></section>`;
+}
 // Detail page play list: one big platform tag, then one indented line per entry (세이프 / 언세이프) with its 열기 button.
 function playSection(w){
  const names=[...new Set(w.platforms.map(p=>p.name))];
- const groups=names.map(n=>`<div class="play-group">${platformTag(n)}${w.platforms.filter(p=>p.name===n).map(p=>`<div class="play-row"><span class="play-what">${p.safety.length?`<b>${safeText(p.safety)}</b>`:''}${statusChip(p.status)}${p.releaseNote?`<small>${esc(p.releaseNote)}</small>`:''}</span>${p.url?`<a class="btn btn-s" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc([p.name,...p.safety.map(safeName)].filter(Boolean).join(' '))} 열기 (새 창)">열기</a>`:''}</div>`).join('')}</div>`).join('');
+ const groups=names.map(n=>`<div class="play-group">${platformTag(n)}${w.platforms.filter(p=>p.name===n).map(p=>`<div class="play-row"><span class="play-what">${p.safety.length?`<b>${safeText(p.safety)}</b>`:''}${statusChip(p.status)}${versionOf(w,p)?`<span class="ver">v${versionOf(w,p)}</span>`:''}${p.releaseNote?`<small>${esc(p.releaseNote)}</small>`:''}</span>${p.url?`<a class="btn btn-s" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc([p.name,...p.safety.map(safeName)].filter(Boolean).join(' '))} 열기 (새 창)">열기</a>`:''}</div>`).join('')}</div>`).join('');
  return `<section class="play" aria-labelledby="play-title"><h3 id="play-title">플레이</h3>${groups}${w.platforms.some(p=>p.url)?'':'<p class="play-none">작품 바로가기 링크를 준비하고 있습니다.</p>'}<button type="button" class="btn btn-s" id="copy-link">이 작품 링크 복사</button><p id="share-state" class="share-state" role="status"></p></section>`;
 }
-function showWork(w){document.title=`${w.name} · 민초파왹`;const meta=[...w.genres,w.type,...w.romance,...w.keywords].filter(Boolean);$('detail-content').innerHTML=`<a class="back" href="#collection"><svg aria-hidden="true" width="14" height="12" viewBox="0 0 14 12"><path d="M14 6H2M7 1L2 6l5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>수집첩으로 돌아가기</a><div class="detail-header"><div class="detail-cover${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="${esc(w.name)}">`:esc(w.name)}</div><div class="detail-main"><div class="detail-title"><span class="mono">COLLECTION / No.${esc(w.number)}</span><h2 id="detail-title">${esc(w.name)}</h2>${w.tagline?`<p class="detail-tagline">${esc(w.tagline)}</p>`:''}${meta.length?`<p class="detail-tags">${meta.map(esc).join(' · ')}</p>`:''}</div>${playSection(w)}</div></div>${block('작품 소개',w.description||'상세 소개를 준비하고 있습니다.')}${block('유저 역할',w.role)}${block('시작 상황',w.start)}${block('플레이 안내',w.notes)}${galleryViewer(w)}`;$('copy-link').addEventListener('click',copyLink);if(w.gallery.length)bindViewer(w);}
+function showWork(w){document.title=`${w.name} · 민초파왹`;const meta=[...w.genres,w.type,...w.romance,...w.keywords].filter(Boolean);$('detail-content').innerHTML=`<a class="back" href="#collection"><svg aria-hidden="true" width="14" height="12" viewBox="0 0 14 12"><path d="M14 6H2M7 1L2 6l5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>수집첩으로 돌아가기</a><div class="detail-header"><div class="detail-cover${w.image?'':' no-art'}">${w.image?`<img src="${esc(w.image)}" alt="${esc(w.name)}">`:esc(w.name)}</div><div class="detail-main"><div class="detail-title"><span class="mono">COLLECTION / No.${esc(w.number)}</span><h2 id="detail-title">${esc(w.name)}</h2>${w.tagline?`<p class="detail-tagline">${esc(w.tagline)}</p>`:''}${meta.length?`<p class="detail-tags">${meta.map(esc).join(' · ')}</p>`:''}</div>${playSection(w)}</div></div>${introBlock(w)}${personaBlock(w)}${block('시작 상황',w.start)}${block('플레이 안내',w.notes)}${galleryViewer(w)}`;$('copy-link').addEventListener('click',copyLink);mountIntro(w);if(w.gallery.length)bindViewer(w);}
 // Gallery: an old-style image viewer window (preview + thumbnail list); the preview opens the original in a dialog.
 const imgName=i=>'IMG_'+String(i+1).padStart(2,'0');
 function galleryViewer(w){if(!w.gallery.length)return '';return `<section class="detail-block"><h3>이미지 갤러리</h3><div class="viewer"><div class="viewer-bar"><span>gallery_viewer.exe — ${esc(w.name)}</span><span aria-hidden="true">_ □ ×</span></div><div class="viewer-body"><button type="button" class="viewer-preview" id="viewer-open" aria-label="원본 크게 보기"><img id="viewer-main" src="${esc(w.gallery[0])}" alt="${esc(w.name)} ${imgName(0)}"></button><ul class="viewer-thumbs" aria-label="${esc(w.name)} 이미지 목록">${w.gallery.map((src,i)=>`<li><button type="button" class="viewer-thumb" data-i="${i}" aria-pressed="${i===0}" aria-label="${imgName(i)} 미리보기"><span class="viewer-thumb-art"><img src="${esc(src)}" alt="" loading="lazy"></span><span>${imgName(i)}</span><small></small></button></li>`).join('')}</ul></div><div class="viewer-status"><span>${w.gallery.length} object(s)</span><span id="viewer-info">${imgName(0)}</span><span class="viewer-tip">미리보기를 누르면 원본 크게 보기</span></div></div></section>`;}
