@@ -48,7 +48,9 @@ const ALIEN_LINES=(Array.isArray(FUN.alienLines)?FUN.alienLines:[]).map(x=>Strin
 // Front frames by rarity (transparent PNG laid over the picture). A tier without one keeps the built-in frame.
 const FRAMES={1:safeURL(CARD.frame1),2:safeURL(CARD.frame2),3:safeURL(CARD.frame3)};
 const FRAME_LIGHT={1:CARD.frame1Text==='밝은 글자',2:CARD.frame2Text==='밝은 글자',3:CARD.frame3Text==='밝은 글자'};
-const BACK=CARD_BACK?`<div class="gcard-back art"><img src="${esc(CARD_BACK)}" alt=""></div>`:`<div class="gcard-back"><span>${UFO}</span><b>?</b></div>`;
+// A card not pulled yet always shows the UFO and question mark; the uploaded back is for cards waiting to be turned over.
+const UNKNOWN=`<div class="gcard-back"><span>${UFO}</span><b>?</b></div>`;
+const BACK=CARD_BACK?`<div class="gcard-back art"><img src="${esc(CARD_BACK)}" alt=""></div>`:UNKNOWN;
 const owned=c=>MintDex.read()[MintDex.key(c.work.id,c.src)]||0;
 
 document.body.insertAdjacentHTML('beforeend',`
@@ -83,7 +85,7 @@ async function pull(){
 function zoom(c){$('gzoom-img').src=c.src;$('gzoom-img').alt=c.work.name;$('gzoom-title').textContent=`${c.work.name} — No.${c.work.number}`;$('gzoom-tier').textContent=STARS(c.tier);$('gzoom-go').href='#work/'+c.work.id;$('gzoom').showModal();}
 function renderBook(){
  const works=[...new Set(CARDS.map(c=>c.work))];
- $('gacha-book').innerHTML=`<p class="gacha-progress">모은 카드 <b>${CARDS.filter(owned).length}</b> / ${CARDS.length}</p>`+works.map(w=>{const cards=CARDS.filter(c=>c.work===w);return `<section class="gbook-work"><h3><small>No.${esc(w.number)}</small> ${esc(w.name)} <span>${cards.filter(owned).length}/${cards.length}</span></h3><div class="gbook-grid">${cards.map(c=>{const n=owned(c);const i=CARDS.indexOf(c);return n?`<button type="button" class="gbook-card" data-card="${i}" aria-label="${esc(w.name)} ${STARS(c.tier)} 카드 크게 보기">${cardHTML(c,'flipped mini')}${n>1?`<span class="gbook-n">×${n}</span>`:''}</button>`:`<div class="gbook-card none" aria-label="아직 없는 ${STARS(c.tier)} 카드"><div class="gcard t${c.tier} mini"><div class="gcard-in">${BACK}</div></div><span class="gbook-n">${STARS(c.tier)}</span></div>`;}).join('')}</div></section>`;}).join('');
+ $('gacha-book').innerHTML=`<p class="gacha-progress">모은 카드 <b>${CARDS.filter(owned).length}</b> / ${CARDS.length}</p>`+works.map(w=>{const cards=CARDS.filter(c=>c.work===w);return `<section class="gbook-work"><h3><small>No.${esc(w.number)}</small> ${esc(w.name)} <span>${cards.filter(owned).length}/${cards.length}</span></h3><div class="gbook-grid">${cards.map(c=>{const n=owned(c);const i=CARDS.indexOf(c);return n?`<button type="button" class="gbook-card" data-card="${i}" aria-label="${esc(w.name)} ${STARS(c.tier)} 카드 크게 보기">${cardHTML(c,'flipped mini')}${n>1?`<span class="gbook-n">×${n}</span>`:''}</button>`:`<div class="gbook-card none" aria-label="아직 없는 ${STARS(c.tier)} 카드"><div class="gcard t${c.tier} mini"><div class="gcard-in">${UNKNOWN}</div></div><span class="gbook-n">${STARS(c.tier)}</span></div>`;}).join('')}</div></section>`;}).join('');
 }
 function tab(name){for(const n of ['draw','book']){$('gtab-'+n).setAttribute('aria-selected',String(n===name));$('gacha-'+n).hidden=n!==name;}if(name==='book')renderBook();}
 function openGacha(){if(!CARDS.length)return;const tiers=[1,2,3].filter(t=>CARDS.some(c=>c.tier===t));const sum=tiers.reduce((n,t)=>n+ODDS[t],0);

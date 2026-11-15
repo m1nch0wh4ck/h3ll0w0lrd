@@ -387,7 +387,7 @@ content:
     - name: back
       label: 뒷면 이미지
       type: image
-      description: 뽑기 전 카드와 카드첩의 아직 없는 카드에 쓰입니다.
+      description: 뽑기 창에서 뒤집히기 전 카드에 쓰입니다. 카드첩의 아직 없는 카드는 UFO와 물음표 그림으로 나옵니다.
     - name: frame1
       label: 앞면 ★ 프레임 (대표 이미지 카드)
       type: image
