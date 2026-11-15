@@ -498,11 +498,12 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .alien-says{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border:2px solid var(--ink);background:var(--paper);box-shadow:4px 4px var(--mint);font:700 14px/1.5 var(--px);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
 .alien-says.on{opacity:1;transform:none}
 .mintscreen{position:fixed;inset:0;z-index:50;padding:28px 32px;background:var(--mint);color:var(--ink);overflow:hidden;cursor:pointer;outline:0}
+.dos-alien{display:block;width:78px;height:78px;margin-bottom:18px}
 .mintscreen pre{margin:0;font:600 17px/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
 .dos-cursor{display:inline-block;width:.6em;height:1.1em;margin-left:1px;background:currentColor;vertical-align:text-bottom;animation:gblink 1s steps(2) infinite}
 @keyframes gblink{50%{opacity:0}}
 .mintscreen.glitch{animation:mflash .65s steps(1)}
-.mintscreen.glitch>pre{animation:mglitch .65s steps(1)}
+.mintscreen.glitch>*{animation:mglitch .65s steps(1)}
 @keyframes mflash{0%{background:var(--mint);color:var(--ink)}24%{background:var(--ink);color:var(--mint)}36%{background:var(--mint);color:var(--ink)}60%{background:#ff3688;color:var(--ink)}68%{background:var(--mint);color:var(--ink)}}
 @keyframes mglitch{0%{transform:none}8%{transform:translate(-10px,2px) skewX(-8deg);text-shadow:5px 0 #ff3688,-5px 0 #1f3fbf}16%{transform:translate(12px,-3px);clip-path:inset(8% 0 58% 0)}24%{transform:translate(-14px,5px) skewX(10deg);clip-path:inset(55% 0 6% 0);text-shadow:-6px 0 #ff3688,6px 0 #1f3fbf}36%{transform:translate(6px,0);clip-path:none;text-shadow:none}48%{transform:translate(-4px,-2px) scaleY(1.04);clip-path:inset(30% 0 34% 0);text-shadow:4px 0 #ff3688,-4px 0 #1f3fbf}60%{transform:translate(8px,2px) skewX(-4deg);clip-path:none}72%{transform:translate(-3px,0);text-shadow:2px 0 #ff3688,-2px 0 #1f3fbf}84%{transform:none;text-shadow:none}}
 @keyframes gblink{50%{opacity:.25}}
@@ -521,6 +522,7 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   .alien-says{font-size:12px}
   .mintscreen{padding:18px 16px}
   .mintscreen pre{font-size:13px}
+  .dos-alien{width:65px;height:65px;margin-bottom:14px}
 }
-@media(prefers-reduced-motion:reduce){.gcard.shake,.gcard.t3 .gcard-front::after,.dos-cursor,.mintscreen.glitch,.mintscreen.glitch>pre{animation:none}}
+@media(prefers-reduced-motion:reduce){.gcard.shake,.gcard.t3 .gcard-front::after,.dos-cursor,.mintscreen.glitch,.mintscreen.glitch>*{animation:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}

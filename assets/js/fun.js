@@ -102,7 +102,10 @@ if(closeBox){closeBox.classList.add('egg-close');closeBox.addEventListener('clic
  const CMD='close_window.exe';
  const OUT=['Bad command or flavor name.','','MINT_CHOCO_OVERFLOW','민트초코 농도가 허용치를 초과했습니다.','이 창은 닫히지 않습니다. 지구인의 기기는 안전합니다.','','STOP: 0xM1NT_CH0C0 (extra mint, extra chips)','*** MEMORY DUMP: mint 100% / choco 100% / toothpaste 0%',''];
  const TIP='아무 곳이나 누르면 돌아갑니다. ';
- el.innerHTML='<pre><span></span><i class="dos-cursor" aria-hidden="true"></i></pre>';
+ // 8-bit alien face: # outline, o face, e eyes and mouth. One character is one pixel.
+ const ALIEN=['....#####....','..##ooooo##..','.#ooooooooo#.','#ooooooooooo#','#oeeoooooeeo#','#oeeeoooeeeo#','#ooeeeoeeeoo#','.#ooeoooeoo#.','.#ooooooooo#.','..#ooooooo#..','...#ooeoo#...','....#ooo#....','.....###.....'];
+ const pixels=ALIEN.map((row,y)=>[...row].map((c,x)=>c==='.'?'':`<rect x="${x}" y="${y}" width="1" height="1" fill="${c==='o'?'#f1f2ed':'#141615'}"/>`).join('')).join('');
+ el.innerHTML=`<svg class="dos-alien" aria-hidden="true" viewBox="0 0 13 13" shape-rendering="crispEdges">${pixels}</svg><pre><span></span><i class="dos-cursor" aria-hidden="true"></i></pre>`;
  document.body.appendChild(el);el.focus();
  const out=el.querySelector('span');const pause=ms=>new Promise(r=>setTimeout(r,ms));
  let alive=true;(async()=>{
