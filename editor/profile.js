@@ -61,7 +61,7 @@ export function normalizeProfile(v){
 }
 const ref=(id,number,name,file,safety,tagline,note)=>({id,source:'cms',show:true,missing:false,base:{name,number,image:SITE+'assets/images/'+file,safety,tagline,tags:'',note,keywords:[],platforms:''},override:{}});
 export function defaultProfile(){
- const works=[ref('seo-yunhwa','01','서윤화','seo-yunhwa.jpg','언세이프티','남의 대사는 잘도 쓰면서, 어쩜 제 마음은 한마디를 못 뱉는지.','루모 리뉴얼 예정'),ref('paik-serin','02','백세린','baek-serin.webp','세이프티,언세이프티','필요한 건 전부 줄게. 넌 계속 내 단짝이면 돼.',''),ref('jin-hyemin','03','진혜민','jin-hyemin.webp','언세이프티','코트에서는 망설임 없이. 정작 네 앞에서는 한없이 침묵중.','루모 리뉴얼 예정')];
+ const works=[ref('seo-yunhwa','01','서윤화','works/seo-yunhwa/mvwdcpo4-b1gqk2pk.webp','언세이프티','남의 대사는 잘도 쓰면서, 어쩜 제 마음은 한마디를 못 뱉는지.','루모 리뉴얼 예정'),ref('paik-serin','02','백세린','works/paik-serin/baek-serin.webp','세이프티,언세이프티','필요한 건 전부 줄게. 넌 계속 내 단짝이면 돼.',''),ref('jin-hyemin','03','진혜민','works/jin-hyemin/jin-hyemin.webp','언세이프티','코트에서는 망설임 없이. 정작 네 앞에서는 한없이 침묵중.','루모 리뉴얼 예정')];
  works[2].override.note='루모 리뉴얼 예정 · 세이프티판 추가 예정';
  return {format:FORMAT,version:VERSION,nameKo:'민초파왹',handle:'m1nch0wh4ck',nameJa:'チョコミント星人',introHeading:'👽 Info!',introQuote:'목마른 놈이\n**스스로 우물 판 곳.**',introSmall:'초보라 미숙합니다.',
   notes:[{title:'01 / CHARACTER IMAGE',text:'캐릭터 이미지는 **AI 생성 / 생성 후 리터칭**합니다.'},{title:'02 / USER NOTE',text:'**유저노트에 서사 진전 및 관계성 등 기입**을 추천드립니다.'}],

@@ -17,7 +17,7 @@ COMING NEXT · LOG · INFO 글 관리는 [CMS-GUIDE.md](CMS-GUIDE.md)를 보세�
 | index.html | 홈페이지 화면 |
 | assets/css/style.css | 디자인 |
 | assets/js/app.js | 화면 이동·검색·작품 상세 |
-| assets/images | 메인 이미지·작품 이미지·GIF |
+| assets/images | 이미지·GIF. `site/`는 홈 화면용, `works/<주소용 이름>/`은 작품별(표지는 폴더 바로 아래, 추가 이미지는 `gallery/`, 전신 이미지는 `profile/`, 추천 페르소나는 `persona/`) |
 | _data/works | 작품별 JSON 데이터 |
 | _data/upcoming | COMING NEXT 항목별 JSON |
 | _data/logs | LOG 기록별 JSON |
