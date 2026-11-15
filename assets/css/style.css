@@ -78,11 +78,17 @@ img{display:block;max-width:100%}
 .handle{font:14px/1.5 var(--mono)}
 .hero-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-top:24px;border-top:2px solid var(--ink)}
 .hero-line{font-size:20px;line-height:1.5;font-weight:700}
-.hero-links{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px}
-.hero-links a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;transition:transform .15s}
-.hero-links .pfm{gap:6px;min-width:0;padding:0 20px 0 8px;font-size:16px;line-height:30px;clip-path:polygon(0 0,calc(100% - 13px) 0,100% 50%,calc(100% - 13px) 100%,0 100%)}
-.hero-links .pfm svg{width:18px;height:18px}
-@media(hover:hover) and (pointer:fine){.hero-links a:hover{transform:translateY(-1px)}}
+.hero-links{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:10px}
+/* Platform links on the home screen: hand-drawn speech bubbles in the platform colour */
+.bubble{position:relative;display:inline-flex;min-height:52px;padding:8px 18px 20px;color:var(--ink);font-weight:700;text-decoration:none;transition:transform .15s}
+.bubble-bg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bubble-bg path{stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.bubble-m .bubble-bg path{fill:var(--melloy)}
+.bubble-l .bubble-bg path{fill:var(--lumo)}
+.bubble-in{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:16px;line-height:24px;white-space:nowrap}
+.bubble-in svg{width:18px;height:18px}
+@media(hover:hover) and (pointer:fine){.bubble:hover{transform:translateY(-2px)}}
+.bubble:active{transform:translateY(1px)}
 .home-cta{min-height:48px;padding:0 20px;font:700 18px/1 var(--px)}
 .hero-visual{position:relative;min-width:0;min-height:320px;background:var(--ink);overflow:hidden}
 .hero-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:64% 40%}
@@ -259,7 +265,6 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   .shell{height:100dvh;margin:0;gap:4px;padding:4px;box-shadow:none}
   .titlebar{height:30px;padding:0 6px 0 10px}
   .window-controls span{width:20px;height:20px}
-  .window-controls span:not(:last-child){display:none}
   .addressbar{gap:4px}
   .address-caption,.address-label{display:none}
   .address-field{height:44px}
@@ -293,7 +298,8 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   .win,.card{gap:3px}
   .win{padding:3px}
   .tbar{padding:0 4px 0 6px}
-  .wctl{width:16px}
+  .wctl{width:auto}
+  .wctl svg{width:39px;height:12px}
   .plate{padding:6px 4px}
   .nm{font-size:18px}
   .info>*{padding:8px}
