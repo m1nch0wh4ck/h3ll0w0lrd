@@ -235,7 +235,7 @@ img{display:block;max-width:100%}
 .tab-panel{display:flex;flex-direction:column;gap:48px;margin-top:-16px}
 .tab-panel>.detail-block:first-child{padding-top:0;border-top:0}
 /* 작품 소개: the platform's intro page, shown as made, across the full width of the page */
-.intro-frame{display:block;width:100%;height:320px;border:1px solid var(--ink);background:#fff}
+.intro-frame{display:block;width:100%;max-width:900px;height:320px;border:1px solid var(--ink);background:#fff}
 /* 캐릭터 프로필: an old paint-program window (tools and colours are decoration) */
 .paint{display:flex;flex-direction:column;gap:4px;padding:4px;background:var(--face);border:1px solid var(--ink);box-shadow:var(--raised)}
 .paint+.paint{margin-top:12px}
@@ -427,16 +427,17 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .fun-win .tab[aria-selected="true"]{min-height:44px}
 .gacha-panel{flex:1;min-height:0;overflow-y:auto;padding:16px;text-align:center}
 .gacha-panel[hidden]{display:none}
-.gcard-stage{position:relative;display:grid;place-items:center;min-height:340px;margin-bottom:34px;perspective:900px;--step:20px}
+.gcard-stage{position:relative;display:grid;place-items:center;min-height:340px;margin-bottom:34px;perspective:900px;--step:66px}
 /* A pile of card backs fanned out to the left; the card in play sits on top, a little to the right. */
 .gdeck,.gslot{grid-area:1/1}
-.gslot{position:relative;z-index:1;transform:translateX(34px)}
-.gdeck{position:relative;transform:translateX(34px)}
-.gdeck .gcard{position:absolute;left:-100px;top:-160px;transform-origin:50% 100%;filter:brightness(.82)}
-.gdeck .gcard:nth-child(1){transform:translate(calc(var(--step)*-4),10px) rotate(-12deg)}
-.gdeck .gcard:nth-child(2){transform:translate(calc(var(--step)*-3),7px) rotate(-9deg)}
-.gdeck .gcard:nth-child(3){transform:translate(calc(var(--step)*-2),4px) rotate(-6deg)}
-.gdeck .gcard:nth-child(4){transform:translate(calc(var(--step)*-1),2px) rotate(-3deg);filter:none}
+.gslot{position:relative;z-index:1;transform:translateX(50px);transition:transform .3s}
+.gdeck{position:relative;transform:translateX(50px);transition:opacity .3s}
+.gdeck .gcard{position:absolute;left:-100px;top:-160px;transform-origin:50% 100%}
+.gdeck .gcard:nth-child(1){transform:translate(calc(var(--step)*-2),8px) rotate(-10deg);filter:brightness(.85)}
+.gdeck .gcard:nth-child(2){transform:translate(calc(var(--step)*-1),3px) rotate(-5deg)}
+.gcard-stage.spent .gdeck{opacity:0}
+.gcard-stage.spent .gslot{transform:none}
+.gacha-daily{margin-bottom:8px;color:var(--muted);font:12px/1.5 var(--mono)}
 .gacha-msg{min-height:3em;margin:12px 0;font-size:16px}
 .gacha-msg b{color:#087052;letter-spacing:1px}
 .gacha-msg small{color:var(--muted);font-size:13px}
@@ -445,7 +446,7 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .gacha-actions .btn:disabled{opacity:.45;cursor:default;transform:none}
 .gacha-left{margin-top:10px;color:var(--muted);font:12px/1.5 var(--mono)}
 .gacha-left.none{color:#ff13f0;font-weight:600}
-.gacha-odds{margin-top:2px;color:var(--muted);font:12px/1.5 var(--mono);white-space:pre-wrap}
+.gacha-odds{margin-top:12px;color:var(--muted);font:12px/1.5 var(--mono);white-space:pre-wrap}
 /* Card: back (UFO + ?) and front (picture, stars, name plate); .flipped shows the front */
 .gcard{--frame:var(--silver);width:200px;aspect-ratio:2/3.2;flex:0 0 auto}
 .gcard.t2{--frame:var(--mint)}
@@ -475,7 +476,7 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
 .gcard.mini .gcard-front.framed .gcard-plate{padding:0 8%}
 .gcard.t3 .gcard-front::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff8c 45%,#00efb266 52%,transparent 65%);background-size:260% 100%;animation:gshine 2.6s linear infinite;pointer-events:none}
 .gcard.draw{animation:gdraw .7s cubic-bezier(.2,.7,.2,1);transform-origin:50% 100%}
-@keyframes gdraw{0%{transform:translate(calc(var(--step)*-1),2px) rotate(-3deg)}45%{transform:translate(calc(var(--step)*-.6),-34px) rotate(-5deg)}100%{transform:none}}
+@keyframes gdraw{0%{transform:translate(calc(var(--step)*-1),3px) rotate(-5deg)}45%{transform:translate(calc(var(--step)*-.6),-34px) rotate(-6deg)}100%{transform:none}}
 @keyframes gshine{from{background-position:120% 0}to{background-position:-60% 0}}
 /* Card book */
 .gacha-progress{margin-bottom:12px;font:14px/1.5 var(--mono)}
@@ -532,9 +533,9 @@ dialog::backdrop{background:#071b13d9;backdrop-filter:blur(5px)}
   .draw-art{height:84px}
   .draw-banner .draw-text{min-width:0}
   .gacha-panel{padding:12px}
-  .gcard-stage{min-height:300px;margin-bottom:22px;--step:11px}
+  .gcard-stage{min-height:300px;margin-bottom:22px;--step:42px}
   .gcard{width:172px}
-  .gslot,.gdeck{transform:translateX(22px)}
+  .gslot,.gdeck{transform:translateX(36px)}
   .gdeck .gcard{left:-86px;top:-137.600px}
   .lock-mark{font-size:52px}
   .alien-says{font-size:12px}

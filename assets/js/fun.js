@@ -10,7 +10,7 @@ const UFO='<svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><g tr
 const DAILY_DRAWS=4;                 // free draws per day (resets at midnight on the visitor's clock)
 const DAILY_DRAWS_BIG=5;             // ...once there are more than BIG_POOL cards to collect
 const BIG_POOL=70;
-const ALIEN_POKES=100;               // poking the alien this many times (or seeing every line) is one more easter egg
+const ALIEN_POKES=100;               // poking the alien this many times is an easter egg; seeing every line is another
 const EGG_BONUS=2;                   // extra draws for each easter egg found for the first time
 const ODDS={1:60,2:35,3:5};          // ★ cover image, ★★ gallery image, ★★★ 뽑기 한정 image (percent)
 const IDLE_MS=120000;                // screensaver after this long without any input
@@ -22,7 +22,7 @@ const SAVER_LEAN=40;                 // screensaver: a cone never leans further 
 // --------------------------------------------------------------------------------------------
 
 // Draw tickets and found easter eggs, kept in this browser only.
-const load=()=>{let s={};try{s=JSON.parse(localStorage.getItem('mint-gacha-v1'))||{};}catch{}const d=new Date(),day=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(s.day!==day){s.day=day;s.used=0;}s.used=s.used|0;s.bonus=s.bonus|0;s.eggs=Array.isArray(s.eggs)?s.eggs:[];return s;};
+const load=()=>{let s={};try{s=JSON.parse(localStorage.getItem('mint-gacha-v1'))||{};}catch{}const d=new Date(),day=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(s.day!==day){s.day=day;s.used=0;}s.used=s.used|0;s.bonus=s.bonus|0;s.eggs=(Array.isArray(s.eggs)?s.eggs:[]).map(e=>e==='alien-fan'?'alien-lines':e);return s;};
 const save=s=>{try{localStorage.setItem('mint-gacha-v1',JSON.stringify(s));}catch{}};
 let DAILY=DAILY_DRAWS;
 const left=s=>Math.max(0,DAILY-s.used)+s.bonus;
@@ -30,7 +30,7 @@ const left=s=>Math.max(0,DAILY-s.used)+s.bonus;
 function toast(text){let t=$('fun-toast');if(!t){t=document.createElement('div');t.id='fun-toast';t.className='fun-toast';t.setAttribute('role','status');document.body.appendChild(t);}
  // A modal dialog covers the page, so the toast moves inside whichever one is open.
  (document.querySelector('dialog[open]')||document.body).appendChild(t);t.textContent=text;t.classList.add('on');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('on'),4500);}
-const EGGS=['mintscreen','alien','saver','alien-fan'];
+const EGGS=['mintscreen','alien','saver','alien-100','alien-lines'];
 function foundEgg(name){const s=load();if(s.eggs.includes(name))return;s.eggs.push(name);s.bonus+=EGG_BONUS;save(s);toast(`이스터에그 발견! (${s.eggs.length}/${EGGS.length}) 뽑기권 +${EGG_BONUS}`);renderLeft();}
 
 // ---- Card draw ----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ const owned=c=>MintDex.read()[MintDex.key(c.work.id,c.src)]||0;
 document.body.insertAdjacentHTML('beforeend',`
 <dialog class="fun-win gacha" id="gacha" aria-labelledby="gacha-title"><div class="dialogbar"><strong id="gacha-title">card_draw.exe — 카드 뽑기</strong><div class="lightbox-buttons"><button type="button" data-close aria-label="닫기">✕</button></div></div>
 <div class="tabs" role="tablist" aria-label="카드 뽑기"><button type="button" class="tab" role="tab" id="gtab-draw" aria-controls="gacha-draw" aria-selected="true">뽑기</button><button type="button" class="tab" role="tab" id="gtab-book" aria-controls="gacha-book" aria-selected="false">카드첩 <span id="gacha-count"></span></button></div>
-<div class="gacha-panel" id="gacha-draw" role="tabpanel" aria-labelledby="gtab-draw"><div class="gcard-stage"><div class="gdeck" aria-hidden="true">${`<div class="gcard t1"><div class="gcard-in">${UNKNOWN}</div></div>`.repeat(4)}</div><div class="gslot" id="gacha-stage"></div></div><p class="gacha-msg" id="gacha-msg" role="status"></p><div class="gacha-actions" id="gacha-result" hidden><a class="btn btn-s" id="gacha-go" href="#collection">작품 보기</a><button type="button" class="btn btn-s" id="gacha-zoom-open">크게 보기</button></div><div class="gacha-actions"><button type="button" class="btn btn-p" id="gacha-pull">카드 뽑기</button></div><p class="gacha-left" id="gacha-left"></p><p class="gacha-odds" id="gacha-odds"></p></div>
+<div class="gacha-panel" id="gacha-draw" role="tabpanel" aria-labelledby="gtab-draw"><p class="gacha-daily" id="gacha-daily"></p><div class="gcard-stage" id="gacha-table"><div class="gdeck" aria-hidden="true">${`<div class="gcard t1"><div class="gcard-in">${UNKNOWN}</div></div>`.repeat(2)}</div><div class="gslot" id="gacha-stage"></div></div><p class="gacha-msg" id="gacha-msg" role="status"></p><div class="gacha-actions" id="gacha-result" hidden><a class="btn btn-s" id="gacha-go" href="#collection">작품 보기</a><button type="button" class="btn btn-s" id="gacha-zoom-open">크게 보기</button></div><div class="gacha-actions"><button type="button" class="btn btn-p" id="gacha-pull">카드 뽑기</button></div><p class="gacha-left" id="gacha-left"></p><p class="gacha-odds" id="gacha-odds"></p></div>
 <div class="gacha-panel" id="gacha-book" role="tabpanel" aria-labelledby="gtab-book" hidden></div></dialog>
 <dialog class="fun-win gzoom" id="gzoom" aria-labelledby="gzoom-title"><div class="dialogbar"><strong id="gzoom-title"></strong><div class="lightbox-buttons"><button type="button" data-close aria-label="닫기">✕</button></div></div><div class="lightbox-body"><img id="gzoom-img" alt=""></div><div class="lightbox-foot"><span id="gzoom-tier"></span><a id="gzoom-go" href="#collection">작품 보기</a></div></dialog>
 <dialog class="fun-win ask" id="ask-win" aria-labelledby="ask-title"><div class="dialogbar"><strong id="ask-title">ask.exe — 지구에서 보내는 말</strong><div class="lightbox-buttons"><a class="ask-out" id="ask-out" href="https://asked.kr/m1nch0wh4ck" target="_blank" rel="noopener noreferrer">새 창</a><button type="button" data-close aria-label="닫기">✕</button></div></div><div class="ask-body"><p class="ask-wait">애스크를 불러오는 중입니다. 창이 계속 비어 있으면 위의 '새 창'을 눌러 주세요.</p><iframe id="ask-frame" title="민초파왹 애스크" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerpolicy="no-referrer"></iframe></div></dialog>`);
@@ -69,7 +69,7 @@ document.querySelectorAll('.fun-win').forEach(d=>{d.addEventListener('click',e=>
 window.addEventListener('hashchange',()=>document.querySelectorAll('.fun-win[open]').forEach(d=>d.close()));
 
 const cardHTML=(c,cls='')=>`<div class="gcard t${c.tier} ${cls}"><div class="gcard-in">${BACK}<div class="gcard-front${FRAMES[c.tier]?' framed'+(FRAME_LIGHT[c.tier]?' light':''):''}"><img src="${esc(c.src)}" alt="${esc(c.work.name)}">${FRAMES[c.tier]?`<img class="gcard-frame" src="${esc(FRAMES[c.tier])}" alt="">`:''}<span class="gcard-tier">${STARS(c.tier)}</span><span class="gcard-plate"><small>No.${esc(c.work.number)}</small><b>${esc(c.work.name)}</b></span></div></div></div>`;
-function renderLeft(){if(!$('gacha-left'))return;const n=left(load());$('gacha-left').textContent=`남은 뽑기 ${n}회`;$('gacha-left').classList.toggle('none',n<1);$('gacha-pull').disabled=busy||n<1||!CARDS.length;$('gacha-count').textContent=`${CARDS.filter(owned).length}/${CARDS.length}`;if($('draw-progress'))$('draw-progress').textContent=`모은 카드 ${CARDS.filter(owned).length}/${CARDS.length} · 오늘 남은 뽑기 ${n}회`;}
+function renderLeft(){if(!$('gacha-left'))return;const s=load(),n=left(s);$('gacha-left').textContent=`남은 뽑기 ${Math.max(0,DAILY-s.used)} / ${DAILY}`+(s.bonus>0?` + 보너스 ${s.bonus}`:'');$('gacha-left').classList.toggle('none',n<1);$('gacha-pull').disabled=busy||n<1||!CARDS.length;$('gacha-count').textContent=`${CARDS.filter(owned).length}/${CARDS.length}`;if($('draw-progress'))$('draw-progress').textContent=`모은 카드 ${CARDS.filter(owned).length}/${CARDS.length} · 오늘 남은 뽑기 ${n}회`;}
 let busy=false,last=null;
 function pick(){const tiers=[1,2,3].filter(t=>CARDS.some(c=>c.tier===t));let roll=Math.random()*tiers.reduce((n,t)=>n+ODDS[t],0);const tier=tiers.find(t=>(roll-=ODDS[t])<0)||tiers[0];const pool=CARDS.filter(c=>c.tier===tier);return pool[Math.floor(Math.random()*pool.length)];}
 const wait=ms=>new Promise(r=>setTimeout(r,calm?0:ms));
@@ -79,10 +79,12 @@ async function pull(){
  const c=pick();last=c;const count=MintDex.add(c.work.id,c.src);
  $('gacha-result').hidden=true;$('gacha-msg').textContent='교신 중…';renderLeft();
  // The card is drawn off the pile, then turned over.
- $('gacha-stage').innerHTML=cardHTML(c,'draw');const el=$('gacha-stage').firstElementChild;
+ $('gacha-table').classList.remove('spent');$('gacha-stage').innerHTML=cardHTML(c,'draw');const el=$('gacha-stage').firstElementChild;
  // The picture is loaded before the card turns over, so the reveal never shows an empty frame.
  const img=el.querySelector('img');await Promise.all([wait(700),img.decode?img.decode().catch(()=>{}):null]);
  el.classList.remove('draw');el.classList.add('flipped');await wait(450);
+ // The pile is put away once a card is out, and comes back for the next draw.
+ $('gacha-table').classList.add('spent');
  $('gacha-msg').innerHTML=`<b>${STARS(c.tier)}</b> ${esc(c.work.name)} — ${count===1?'새 카드!':`이미 가진 카드 (${count}장째)`}`;
  $('gacha-go').href='#work/'+c.work.id;$('gacha-result').hidden=false;
  busy=false;renderLeft();window.dispatchEvent(new Event('mint:dex'));
@@ -95,7 +97,8 @@ function renderBook(){
 }
 function tab(name){for(const n of ['draw','book']){$('gtab-'+n).setAttribute('aria-selected',String(n===name));$('gacha-'+n).hidden=n!==name;}if(name==='book')renderBook();}
 function openGacha(){if(!CARDS.length)return;const tiers=[1,2,3].filter(t=>CARDS.some(c=>c.tier===t));const sum=tiers.reduce((n,t)=>n+ODDS[t],0);
- $('gacha-odds').textContent='확률  '+tiers.map(t=>`${STARS(t)} ${Math.round(ODDS[t]/sum*100)}%`).join(' · ')+`  ·  하루 ${DAILY}회`;
+ $('gacha-odds').textContent='확률  '+tiers.map(t=>`${STARS(t)} ${Math.round(ODDS[t]/sum*100)}%`).join(' · ');
+ $('gacha-daily').textContent=`하루 ${DAILY}회 · 자정에 다시 채워집니다`;
  if(!$('gacha-stage').firstElementChild){$('gacha-stage').innerHTML=`<div class="gcard t1"><div class="gcard-in">${BACK}</div></div>`;$('gacha-msg').textContent='카드를 뽑아 캐릭터를 수집해 보세요.';}
  tab('draw');renderLeft();if(!$('gacha').open)$('gacha').showModal();}
 $('gacha-pull').addEventListener('click',pull);
@@ -148,7 +151,9 @@ if(hero&&ALIEN_LINES.length){let pokes=0,line=-1,timer;hero.addEventListener('cl
  line=ALIEN_LINES.length>1?(line+1+Math.floor(Math.random()*(ALIEN_LINES.length-1)))%ALIEN_LINES.length:0;b.textContent=ALIEN_LINES[line];b.classList.add('on');
  if(!s.lines.includes(ALIEN_LINES[line]))s.lines.push(ALIEN_LINES[line]);save(s);
  clearTimeout(timer);timer=setTimeout(()=>b.classList.remove('on'),4000);foundEgg('alien');
- if(s.pokes>=ALIEN_POKES||ALIEN_LINES.every(x=>s.lines.includes(x)))foundEgg('alien-fan');});}
+ // Each is rewarded once only: lines added later do not bring the reward back.
+ if(s.pokes>=ALIEN_POKES)foundEgg('alien-100');
+ if(ALIEN_LINES.every(x=>s.lines.includes(x)))foundEgg('alien-lines');});}
 
 // ---- Easter egg 3: screensaver, a mint choco cone bouncing around --------------------------------
 if(!calm){let idle,saver=null;
