@@ -14,6 +14,7 @@ const IDLE_MS=120000;                // screensaver after this long without any 
 const SAVER_GROW=5;                  // screensaver: one more cone after about this many bounces per cone
 const SAVER_MAX=12;                  // screensaver: most cones on screen
 const SAVER_TURN=12;                 // screensaver: a bounce turns the path by up to this many degrees
+const SAVER_LEAN=40;                 // screensaver: a cone never leans further than this many degrees
 // Card back, screensaver picture and the alien's lines are edited in Pages CMS (_data/fun.json, '카드 뽑기 · 꾸미기').
 // --------------------------------------------------------------------------------------------
 
@@ -146,13 +147,15 @@ if(!calm){let idle,saver=null;
   const SPEED=2.9,ART=SAVER_IMG?`<img src="${esc(SAVER_IMG)}" alt="">`:CONE;
   const cones=[];let bounces=0;
   // Each cone keeps its speed; only its direction changes.
-  const add=(x,y,angle,color)=>{const node=document.createElement('i');node.innerHTML=ART;node.style.color=COLORS[color];el.prepend(node);cones.push({node,x,y,dx:Math.cos(angle)*SPEED,dy:Math.sin(angle)*SPEED,tilt:0,color});};
+  const add=(x,y,angle,color,tilt=0)=>{const node=document.createElement('i');node.innerHTML=ART;node.style.color=COLORS[color];el.prepend(node);cones.push({node,x,y,dx:Math.cos(angle)*SPEED,dy:Math.sin(angle)*SPEED,tilt,color});};
   // Bouncing off an edge turns the path a little (up to SAVER_TURN degrees either way) and tips the cone,
   // but never so far that it slides along the wall.
-  const turn=c=>{const a=Math.atan2(c.dy,c.dx)+(Math.random()*2-1)*SAVER_TURN*Math.PI/180;let dx=Math.cos(a),dy=Math.sin(a);
+  const turn=c=>{const by=(Math.random()*2-1)*SAVER_TURN;const a=Math.atan2(c.dy,c.dx)+by*Math.PI/180;let dx=Math.cos(a),dy=Math.sin(a);
    if(Math.abs(dx)<.35)dx=.35*Math.sign(dx||1);if(Math.abs(dy)<.35)dy=.35*Math.sign(dy||1);const n=Math.hypot(dx,dy);
    // The turn must not point the cone back into the wall it just left.
-   c.dx=Math.sign(c.dx)*Math.abs(dx)/n*SPEED;c.dy=Math.sign(c.dy)*Math.abs(dy)/n*SPEED;c.tilt=(Math.random()*2-1)*14;};
+   c.dx=Math.sign(c.dx)*Math.abs(dx)/n*SPEED;c.dy=Math.sign(c.dy)*Math.abs(dy)/n*SPEED;
+   // The cone keeps the lean it has and leans a little further the same way the path turned (up to SAVER_LEAN degrees).
+   c.tilt=Math.max(-SAVER_LEAN,Math.min(SAVER_LEAN,c.tilt+by*1.5));};
   add(Math.random()*(innerWidth-64),Math.random()*(innerHeight-96),(.2+Math.random()*.25)*Math.PI,0);
   saver={el,raf:0};const step=()=>{
    for(const c of [...cones]){
@@ -163,7 +166,7 @@ if(!calm){let idle,saver=null;
     if(hit){turn(c);c.color=(c.color+1)%COLORS.length;c.node.style.color=COLORS[c.color];
      // More ice cream: a new cone splits off from the one that just bounced. The count needed grows with
      // the number of cones, so they keep arriving at about the same pace instead of doubling.
-     if(++bounces>=SAVER_GROW*cones.length&&cones.length<SAVER_MAX){bounces=0;add(c.x,c.y,Math.atan2(c.dy,c.dx)+(Math.random()<.5?1:-1)*(.5+Math.random()*.5),(c.color+2)%COLORS.length);}}
+     if(++bounces>=SAVER_GROW*cones.length&&cones.length<SAVER_MAX){bounces=0;add(c.x,c.y,Math.atan2(c.dy,c.dx)+(Math.random()<.5?1:-1)*(.5+Math.random()*.5),(c.color+2)%COLORS.length,-c.tilt);}}
     c.node.style.transform=`translate(${c.x}px,${c.y}px) rotate(${c.tilt}deg)`;}
    if(saver)saver.raf=requestAnimationFrame(step);};
   step();};
