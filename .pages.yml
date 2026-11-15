@@ -365,60 +365,65 @@ content:
     description: 오른쪽 안내 상자입니다. 엔터로 문단을 나누고, 강조할 부분은 글자를 선택한 뒤 굵게(B) 버튼을 누르세요.
 - name: fun
   label: 카드 뽑기 · 꾸미기
-  description: 카드 뽑기의 카드 뒷면, 화면보호기 그림, 메인 그림을 여러 번 눌렀을 때 나오는 대사입니다. 비워 두면 기본 디자인이 쓰입니다.
+  description: 화면보호기 그림, 메인 그림을 여러 번 눌렀을 때 나오는 대사, 카드 뽑기의 카드 디자인입니다. 비워 두면 기본 디자인이 쓰입니다.
   type: file
   path: _data/fun.json
   format: json
   fields:
-  - name: cardBack
-    label: 카드 뒷면 이미지
-    type: image
-    description: 뽑기 전 카드와 카드첩의 아직 없는 카드에 쓰입니다. 세로 5:8 비율(예 500×800)로 만들면 잘리지 않습니다.
   - name: saverImage
-    label: 화면보호기 이미지
+    label: 화면보호기 · 튕겨 다니는 그림
     type: image
-    description: 화면을 튕겨 다니는 그림입니다. 배경이 투명한 PNG나 GIF를 권합니다. 높이 96px로 표시되니 200px 안팎이면 충분합니다.
+    description: 2분간 가만히 두면 화면을 튕겨 다니는 그림입니다. 배경이 투명한 PNG나 GIF를 권합니다. 높이 96px로 표시되니 200px 안팎이면 충분합니다.
   - name: alienLines
     label: 외계인 대사
     type: string
     list: true
     description: 메인 그림을 5번 누르면 이 중 하나가 나옵니다.
-  - name: frame1
-    label: 카드 앞면 프레임 ★ (대표 이미지)
-    type: image
-    description: 가운데가 투명한 PNG를 올리면 카드 그림 위에 덮입니다. 세로 5:8(500×800)로 만들고, 맨 아래 110px에는 작품 번호와 이름이 찍히니 글자가 들어갈 자리를 비워 두세요. 비워 두면 기본 테두리가 쓰입니다.
-  - name: frame1Text
-    label: ★ 프레임 위 이름 글자색
-    type: select
-    options:
-      values:
-      - 어두운 글자
-      - 밝은 글자
-      multiple: false
-    description: 이 프레임의 이름 자리가 어두우면 '밝은 글자'를 고르세요. 비워 두면 어두운 글자입니다.
-  - name: frame2
-    label: 카드 앞면 프레임 ★★ (추가 이미지)
-    type: image
-    description: ★ 프레임과 같은 규격입니다.
-  - name: frame2Text
-    label: ★★ 프레임 위 이름 글자색
-    type: select
-    options:
-      values:
-      - 어두운 글자
-      - 밝은 글자
-      multiple: false
-    description: 이 프레임의 이름 자리가 어두우면 '밝은 글자'를 고르세요. 비워 두면 어두운 글자입니다.
-  - name: frame3
-    label: 카드 앞면 프레임 ★★★ (뽑기 한정 이미지)
-    type: image
-    description: ★ 프레임과 같은 규격입니다.
-  - name: frame3Text
-    label: ★★★ 프레임 위 이름 글자색
-    type: select
-    options:
-      values:
-      - 어두운 글자
-      - 밝은 글자
-      multiple: false
-    description: 이 프레임의 이름 자리가 어두우면 '밝은 글자'를 고르세요. 비워 두면 어두운 글자입니다.
+  - name: card
+    label: 카드 디자인 (뒷면 → 앞면)
+    type: object
+    description: 모두 세로 5:8(500×800) 이미지입니다. 올리지 않은 칸은 기본 디자인이 쓰입니다.
+    fields:
+    - name: back
+      label: 뒷면 이미지
+      type: image
+      description: 뽑기 전 카드와 카드첩의 아직 없는 카드에 쓰입니다.
+    - name: frame1
+      label: 앞면 ★ 프레임 (대표 이미지 카드)
+      type: image
+      description: 가운데가 투명한 PNG를 올리면 카드 그림 위에 덮입니다. 맨 아래 110px에는 작품 번호와 이름이 찍히니 글자가 들어갈 자리를 비워 두세요.
+    - name: frame1Text
+      label: 앞면 ★ 이름 글자색
+      type: select
+      options:
+        values:
+        - 어두운 글자
+        - 밝은 글자
+        multiple: false
+      description: 이 프레임의 이름 자리가 어두우면 '밝은 글자'를 고르세요. 비워 두면 어두운 글자입니다.
+    - name: frame2
+      label: 앞면 ★★ 프레임 (추가 이미지 카드)
+      type: image
+      description: ★ 프레임과 같은 규격입니다.
+    - name: frame2Text
+      label: 앞면 ★★ 이름 글자색
+      type: select
+      options:
+        values:
+        - 어두운 글자
+        - 밝은 글자
+        multiple: false
+      description: 이 프레임의 이름 자리가 어두우면 '밝은 글자'를 고르세요. 비워 두면 어두운 글자입니다.
+    - name: frame3
+      label: 앞면 ★★★ 프레임 (뽑기 한정 이미지 카드)
+      type: image
+      description: ★ 프레임과 같은 규격입니다.
+    - name: frame3Text
+      label: 앞면 ★★★ 이름 글자색
+      type: select
+      options:
+        values:
+        - 어두운 글자
+        - 밝은 글자
+        multiple: false
+      description: 이 프레임의 이름 자리가 어두우면 '밝은 글자'를 고르세요. 비워 두면 어두운 글자입니다.

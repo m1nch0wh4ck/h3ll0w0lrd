@@ -37,11 +37,13 @@ try{
   [[urls([w.image]),1],[urls(w.gallery),2],[urls(w.secretGallery),3]].forEach(([list,tier])=>list.forEach(src=>CARDS.push({work,src,tier})));}
 }catch(error){console.error(error);}
 try{const r=await fetch('data/site.json',{cache:'no-cache'});const f=r.ok?(await r.json()||{}).fun:null;if(f&&typeof f==='object')FUN=f;}catch(error){console.error(error);}
-const CARD_BACK=safeURL(FUN.cardBack),SAVER_IMG=safeURL(FUN.saverImage);
+// Card images are grouped under 'card' in the CMS form.
+const CARD=FUN.card&&typeof FUN.card==='object'?FUN.card:{};
+const CARD_BACK=safeURL(CARD.back),SAVER_IMG=safeURL(FUN.saverImage);
 const ALIEN_LINES=(Array.isArray(FUN.alienLines)?FUN.alienLines:[]).map(x=>String(x||'').trim()).filter(Boolean);
 // Front frames by rarity (transparent PNG laid over the picture). A tier without one keeps the built-in frame.
-const FRAMES={1:safeURL(FUN.frame1),2:safeURL(FUN.frame2),3:safeURL(FUN.frame3)};
-const FRAME_LIGHT={1:FUN.frame1Text==='밝은 글자',2:FUN.frame2Text==='밝은 글자',3:FUN.frame3Text==='밝은 글자'};
+const FRAMES={1:safeURL(CARD.frame1),2:safeURL(CARD.frame2),3:safeURL(CARD.frame3)};
+const FRAME_LIGHT={1:CARD.frame1Text==='밝은 글자',2:CARD.frame2Text==='밝은 글자',3:CARD.frame3Text==='밝은 글자'};
 const BACK=CARD_BACK?`<div class="gcard-back art"><img src="${esc(CARD_BACK)}" alt=""></div>`:`<div class="gcard-back"><span>${UFO}</span><b>?</b></div>`;
 const owned=c=>MintDex.read()[MintDex.key(c.work.id,c.src)]||0;
 
